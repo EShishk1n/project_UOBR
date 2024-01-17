@@ -1,0 +1,43 @@
+{% extends 'dvizhenie/base.html' %}
+
+{% block content %}
+<div class="row"><h3>Кустовые площадки</h3></div>
+
+<div class="row">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Номер</th>
+                <th>Месторождение</th>
+                <th>1 этап</th>
+                <th>2 этап</th>
+                <th>Трузоподъемность</th>
+                <th>Тип раствора</th>
+                <th>ГС</th>
+                <th>ННС</th>
+                <th>Примечание</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pad in pads %}
+                <tr>
+                    <td>{{pad.number}}</td>
+                    <td>{{pad.field}}</td>
+                    <td>{{pad.first_stage_date}}</td>
+                    <td>{{pad.second_stage_date}}</td>
+                    <td>{{pad.required_capacity}}</td>
+                    <td>{{pad.required_mud}}</td>
+                    <td>{{pad.gs_quantity}}</td>
+                    <td>{{pad.nns_quantity}}</td>
+                    <td>{{pad.marker}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <form class="form-inline" action="" method="post">
+        {% csrf_token %}
+        {{form}}
+        <input type="submit">
+    </form>
+</div>
+{% endblock %}

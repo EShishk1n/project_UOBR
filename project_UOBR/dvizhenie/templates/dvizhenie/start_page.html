@@ -1,0 +1,88 @@
+{% extends 'dvizhenie/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container px-4 py-5 text-center ">
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <img class="d-block ms-auto mb-4" src="{% static 'dvizhenie/img/logo_rn.png' %}" alt="" width="150"
+                 height="100">
+        </div>
+        <div class="col-lg-6 mx-auto">
+            <img class="d-block me-auto mb-4" src="{% static 'dvizhenie/img/logo_uobr.png' %}" alt="" width="150"
+                 height="100">
+        </div>
+        <h1 class="display-5 fw-bold">Движение буровых установок</h1>
+        <div class="col-lg-12 mx-auto">
+            <p class="lead mb-4">Приложение для значительной оптимизации работы по определению движения
+                буровых установок</p>
+        </div>
+        <figure class="text-center">
+            <blockquote class="blockquote">
+                <p>Делай движение ради движения. Только здесь и сейчас...</p>
+            </blockquote>
+            <figcaption class="blockquote-footer">
+                <cite title="Source Title">к/ф "Мирный воин"</cite>
+            </figcaption>
+        </figure>
+    </div>
+</div>
+
+<div class="container px-4 py-5">
+    <div class="row">
+        <div class="col-lg-4 col-sm-12">
+            <div class="product-card">
+                <div class="product-thumb">
+                    <a href="#"><img src="{% static 'dvizhenie/img/drilling_rig.jpg' %}"></a>
+                </div>
+                <div class="product-details">
+                    <h4><a href="#">Буровые установки</a></h4>
+                    <div class="product-bottom-details">
+                        <div class="product-links">
+                            <a href="#">Парк БУ</a><br/>
+                            <a href="#">Расположение</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-sm-12">
+            <div class="product-card">
+                <div class="product-thumb">
+                    <a href="#"><img src="{% static 'dvizhenie/img/pad.jpg' %}"></a>
+                </div>
+                <div class="product-details">
+                    <h4><a href="#">Кустовые площадки</a></h4>
+                    <div class="product-bottom-details">
+                        <div class="product-links">
+                            <a href="#">Готовность кустовых площадок</a><br/>
+                            <h4 style="color: white"> \</h4>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-sm-12">
+            <div class="product-card">
+                <div class="product-thumb">
+                    <a href="#"><img src="{% static 'dvizhenie/img/map.jpg' %}"></a>
+                </div>
+                <div class="product-details">
+                    <h4><a href="#">Движение БУ</a></h4>
+                    <div class="product-bottom-details">
+                        <div class="product-links">
+                            <a href="#">Актуальная информация</a><br/>
+                            <a href="#">Обновить расчет</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

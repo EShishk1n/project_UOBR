@@ -1,0 +1,38 @@
+{% extends 'dvizhenie/base.html' %}
+
+{% block content %}
+<div class="row"><h3>Местоположение буровых установок</h3></div>
+
+<div class="row">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Тип БУ</th>
+                <th>Подрядчик</th>
+                <th>Номер куста</th>
+                <th>Месторождение</th>
+                <th>Количество скважин (ГС+ННС)</th>
+                <th>Дата окончания бурения</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for rig_position in rig_positions %}
+                <tr>
+                    <td>{{rig_position.drilling_rig.type}}</td>
+                    <td>{{rig_position.drilling_rig.contractor}}</td>
+                    <td>{{rig_position.pad.number}}</td>
+                    <td>{{rig_position.pad.field}}</td>
+                    <td>{{rig_position.pad.gs_quantity}} + {{rig_position.pad.nns_quantity}}</td>
+                    <td>{{rig_position.end_date}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <form class="form-inline" action="" method="post">
+        {% csrf_token %}
+        {{form}}
+        <input type="submit">
+    </form>
+</div>
+{% endblock %}
