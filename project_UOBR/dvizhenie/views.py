@@ -14,21 +14,21 @@ def start_page(request):
 
 class DrillingRigView(ListView):
     model = DrillingRig
-    template_name = 'dvizhenie/drilling_rig.html'
+    template_name = 'dvizhenie/rig.html'
     context_object_name = 'rigs'
 
 
 class DrillingRigAddView(CreateView):
     model = DrillingRig
     fields = '__all__'
-    template_name = 'dvizhenie/drilling_rig.html'
+    template_name = 'dvizhenie/add_update.html'
     success_url = reverse_lazy('rig')
 
 
 class DrillingRigUpdateView(UpdateView):
     model = DrillingRig
     fields = '__all__'
-    template_name = 'dvizhenie/drilling_rig.html'
+    template_name = 'dvizhenie/rig.html'
     pk_url_kwarg = 'pk'
     success_url = reverse_lazy('rig')
 
@@ -37,7 +37,7 @@ class DrillingRigDeleteView(DeleteView):
     model = DrillingRig
     pk_url_kwarg = 'pk'
     success_url = reverse_lazy('rig')
-    template_name = 'dvizhenie/drilling_rig.html'
+    template_name = 'dvizhenie/rig.html'
 
 
 class PadView(ListView):

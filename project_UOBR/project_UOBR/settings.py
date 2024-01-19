@@ -37,7 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'dvizhenie'
+    'dvizhenie',
+]
+
+INSTALLED_APPS += [
+    'crispy_forms',
+    "crispy_bootstrap5",
 ]
 
 MIDDLEWARE = [
@@ -84,6 +89,12 @@ DATABASES = {
     }
 }
 
+AUTHENTICATION_BACKENDS = (
+
+    'social_core.backends.github.GithubOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -109,7 +120,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Yekaterinburg'
 
 USE_I18N = True
 
@@ -125,3 +136,14 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+SOCIAL_AUTH_JSONFIELD_ENABLED = True
+
+SOCIAL_AUTH_GITHUB_KEY = 'd1cbeb86b7aca091ce49'
+SOCIAL_AUTH_GITHUB_SECRET = 'cb495a6b85e7c3ca79bc9611f1dbcc7ee4744853'
+
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+
+CRISPY_TEMPLATE_PACK = "bootstrap5"

@@ -1,5 +1,5 @@
 html {
-    font-size: 20px;
+    font-size: 16px;
 }
 
 body {
@@ -11,29 +11,40 @@ body {
     min-width: 320px;
 }
 
+.page {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
 img {
     max-width: 100%;
     height: auto;
 }
 
 section {
-    padding: 50px 0;
+    padding: 20px 0;
 }
 
 a {
     color: #111;
+    text-decoration: none;
 }
 
-a.hover {
+a:hover {
     color: #555;
 }
 
+blockquote {
+    font-style: italic;
+    color: #555;
+}
 /* Header */
 
 .navbar-light .navbar-nav .nav-link {
     color: #555;
     font-weight: 400;
-    font-size: 18px;
+    font-size: 16px;
 }
 
 .navbar-nav .dropdown-menu {
@@ -51,8 +62,40 @@ a.hover {
     transform: scale(0);
     }
 
+.dropdown-menu {
+    color: #555;
+    font-weight: 400;
+    font-size: 16px;
+}
+
 .top-menu a:hover::after {
     transform: scale(1);
+}
+
+.navbar-nav .form-control {
+    font-size: 16px;
+    padding-right: 0.75px;
+}
+
+.navbar-nav .form-control:focus {
+    background: none;
+    box-shadow: none;
+    border-color: #ced4da;
+}
+
+.navbar-nav .btn {
+    font-size: 16px;
+    padding-right: 5px;
+    padding-left: 5px;
+    color: #555;
+    font-weight: 400;
+    font-size: 16px;
+    border: 0.5px solid;
+}
+
+
+.navbar-nav .btn:hover {
+    background: #EAEDED;
 }
 
 /* Header */
@@ -62,6 +105,10 @@ a.hover {
 
 .footer {
     background-color: #343434;
+    margin-top: auto;
+    height: 60px;
+    padding-top: 10px;
+
 }
 
 .footer a, .footer span {
@@ -112,19 +159,6 @@ a.hover {
     margin-right: 20px;
 }
 
-.product-details h4 a::after {
-    content: '';
-    display: flex;
-    background-color: #111;
-    height: 1px;
-    transition: all .3s;
-    transform: scale(0);
-    }
-
-.product-details h4 a:hover::after {
-    transform: scale(1);
-    color: #99A3A4;
-}
 
 .product-details h4 a:hover {
     color: #000000;
@@ -159,4 +193,16 @@ a.hover {
 }
 /* Product card */
 
+/* Table */
 
+.table {
+    vertical-align: middle;
+    text-align: center;
+}
+
+.table-dark {
+    --bs-table-bg: #343434
+}
+
+
+/* Table */
