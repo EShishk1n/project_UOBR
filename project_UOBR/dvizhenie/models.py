@@ -70,7 +70,6 @@ class DrillingRig(models.Model):
     number = models.CharField(unique=True)
     contractor = models.ForeignKey(Contractor, on_delete=models.CASCADE)
     mud = models.CharField(choices=Mud.choices)
-    status = models.CharField(null=True)
 
     def capacity(self) -> int:
         is_DR_russian = str(self.type)[4]

@@ -20,7 +20,6 @@
                     <th scope="col">Тип БУ</th>
                     <th scope="col">Подрядчик</th>
                     <th scope="col">Тип бурового раствора</th>
-                    <th scope="col">Статус</th>
                     <th scope="col">Действия</th>
                 </tr>
                 </thead>
@@ -31,11 +30,10 @@
                     <td>{{rig.type}}</td>
                     <td>{{rig.contractor}}</td>
                     <td>{{rig.mud}}</td>
-                    <td>{{rig.status}}</td>
                     <td>
                         <div class="button-group">
                             <a href="{% url 'rig_update' rig.id %}" class="link-secondary">Изменить</a>
-                            <a href="{% url 'rig_delete' rig.id %}" class="link-warning">Удалить</a>
+                            <a href="{% url 'rig_delete' rig.id %}" class="link-danger">Удалить</a>
                         </div>
                     </td>
                 </tr>

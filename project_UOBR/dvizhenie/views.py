@@ -3,6 +3,7 @@ from django.urls import reverse_lazy
 
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 
+from .forms import DrillingRigForm
 from .models import DrillingRig, Pad, RigPosition, NextPosition
 from .services.define_position import define_position_and_put_into_BD
 from .services.services import get_info_from_BD
@@ -13,31 +14,32 @@ def start_page(request):
 
 
 class DrillingRigView(ListView):
-    model = DrillingRig
     template_name = 'dvizhenie/rig.html'
     context_object_name = 'rigs'
+    model = DrillingRig
+    fields = '__all__'
 
 
 class DrillingRigAddView(CreateView):
-    model = DrillingRig
-    fields = '__all__'
+    form_class = DrillingRigForm
     template_name = 'dvizhenie/add_update.html'
     success_url = reverse_lazy('rig')
 
 
 class DrillingRigUpdateView(UpdateView):
     model = DrillingRig
-    fields = '__all__'
-    template_name = 'dvizhenie/rig.html'
+    form_class = DrillingRigForm
+    template_name = 'dvizhenie/add_update.html'
     pk_url_kwarg = 'pk'
     success_url = reverse_lazy('rig')
 
 
 class DrillingRigDeleteView(DeleteView):
     model = DrillingRig
+    context_object_name = 'rig'
     pk_url_kwarg = 'pk'
     success_url = reverse_lazy('rig')
-    template_name = 'dvizhenie/rig.html'
+    template_name = 'dvizhenie/delete.html'
 
 
 class PadView(ListView):
@@ -89,7 +91,6 @@ class RigPositionUpdateView(UpdateView):
 
 
 def next_position(request):
-
     if request.method == "POST":
         define_position_and_put_into_BD()
 

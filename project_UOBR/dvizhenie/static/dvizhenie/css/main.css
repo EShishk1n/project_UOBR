@@ -39,6 +39,8 @@ blockquote {
     font-style: italic;
     color: #555;
 }
+
+
 /* Header */
 
 .navbar-light .navbar-nav .nav-link {
@@ -201,8 +203,11 @@ blockquote {
 }
 
 .table-dark {
-    --bs-table-bg: #343434
+    --bs-table-bg: #343434;
 }
 
+.asteriskField {
+    display: none;
+}
 
 /* Table */
