@@ -32,6 +32,5 @@ urlpatterns = [
     path('pad/<int:pk>/delete', views.PadDeleteView.as_view(), name='pad_delete'),
     path('rig_position', views.RigPositionView.as_view(), name='rig_position'),
     path('rig_position/<int:pk>', views.RigPositionUpdateView.as_view(), name='rig_position_update'),
-    path('auth', views.auth, name='authentication'),
     path('next_position', views.next_position, name='next_position'),
 ]

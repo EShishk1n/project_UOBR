@@ -23,6 +23,7 @@ class Contractor(models.Model):
 class Mud(models.TextChoices):
     """Типы применяемых буровых растворов"""
 
+    default = '', 'Выберите тип бурового раствора'
     ruo = 'РУО', 'РУО'
     rvo = 'РВО', 'РВО'
 
@@ -30,6 +31,7 @@ class Mud(models.TextChoices):
 class Field(models.TextChoices):
     """Основные месторождения на проекте РН-ЮНГ"""
 
+    default = '', 'Выберите месторождение'
     VS = 'ВС', 'Восточно-Сургутское'
     VTK = 'ВТК', 'Восточно-Токайское'
     VPR = 'ВПР', 'Восточно-Правдинское'
@@ -66,9 +68,9 @@ class Field(models.TextChoices):
 class DrillingRig(models.Model):
     """Буровые установки с основной информацией"""
 
-    type = models.ForeignKey(type_of_DR, on_delete=models.CASCADE)
+    type = models.ForeignKey(type_of_DR, on_delete=models.CASCADE, default=type_of_DR.type)
     number = models.CharField(unique=True)
-    contractor = models.ForeignKey(Contractor, on_delete=models.CASCADE)
+    contractor = models.ForeignKey(Contractor, on_delete=models.CASCADE, default=Contractor.contractor)
     mud = models.CharField(choices=Mud.choices)
 
     def capacity(self) -> int:
@@ -92,20 +94,20 @@ class Pad(models.Model):
     """Кустовые площадки с основной информацией"""
 
     class Capacity(models.IntegerChoices):
+        default = int(), 'Выберите требуемую грузоподъемность'
         very_heavy = 400, '400'
         heavy = 320, '320'
         less_than_heavy = 270, '270'
         middle = 250, '250'
         less_than_middle = 225, '225'
         light = 200, '200'
-        new = 0, '0'
 
     number = models.CharField(unique=True)
-    field = models.CharField(choices=Field.choices, null=False, blank=True)
-    first_stage_date = models.DateField(null=False, blank=True)
-    second_stage_date = models.DateField(null=False, blank=True)
-    required_capacity = models.IntegerField(choices=Capacity.choices)
-    required_mud = models.CharField(choices=Mud.choices, null=False, blank=True)
+    field = models.CharField(choices=Field.choices, null=False, blank=False, default=Field.default)
+    first_stage_date = models.DateField(null=False, blank=False)
+    second_stage_date = models.DateField(null=False, blank=False)
+    required_capacity = models.IntegerField(choices=Capacity.choices, null=False, blank=False, default=Capacity.default)
+    required_mud = models.CharField(choices=Mud.choices, null=False, blank=False, default=Mud.default)
     gs_quantity = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(24)])
     nns_quantity = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(24)])
 

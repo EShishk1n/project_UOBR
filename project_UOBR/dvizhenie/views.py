@@ -3,7 +3,7 @@ from django.urls import reverse_lazy
 
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 
-from .forms import DrillingRigForm
+from .forms import DrillingRigForm, PadForm, RigPositionForm
 from .models import DrillingRig, Pad, RigPosition, NextPosition
 from .services.define_position import define_position_and_put_into_BD
 from .services.services import get_info_from_BD
@@ -22,14 +22,14 @@ class DrillingRigView(ListView):
 
 class DrillingRigAddView(CreateView):
     form_class = DrillingRigForm
-    template_name = 'dvizhenie/add_update.html'
+    template_name = 'dvizhenie/add_update_rig.html'
     success_url = reverse_lazy('rig')
 
 
 class DrillingRigUpdateView(UpdateView):
     model = DrillingRig
     form_class = DrillingRigForm
-    template_name = 'dvizhenie/add_update.html'
+    template_name = 'dvizhenie/add_update_rig.html'
     pk_url_kwarg = 'pk'
     success_url = reverse_lazy('rig')
 
@@ -39,47 +39,50 @@ class DrillingRigDeleteView(DeleteView):
     context_object_name = 'rig'
     pk_url_kwarg = 'pk'
     success_url = reverse_lazy('rig')
-    template_name = 'dvizhenie/delete.html'
+    template_name = 'dvizhenie/delete_rig.html'
 
 
 class PadView(ListView):
     model = Pad
     template_name = 'dvizhenie/pad.html'
     context_object_name = 'pads'
+    fields = '__all__'
 
 
 class PadAddView(CreateView):
-    model = Pad
-    fields = '__all__'
-    template_name = 'dvizhenie/pad.html'
+    form_class = PadForm
+    template_name = 'dvizhenie/add_update_pad.html'
     success_url = reverse_lazy('pad')
 
 
 class PadUpdateView(UpdateView):
     model = Pad
-    fields = '__all__'
-    template_name = 'dvizhenie/pad.html'
+    form_class = PadForm
+    template_name = 'dvizhenie/add_update_pad.html'
     pk_url_kwarg = 'pk'
     success_url = reverse_lazy('pad')
 
 
 class PadDeleteView(DeleteView):
-    model = DrillingRig
+    model = Pad
     pk_url_kwarg = 'pk'
+    context_object_name = 'pad'
     success_url = reverse_lazy('pad')
-    template_name = 'dvizhenie/pad.html'
+    template_name = 'dvizhenie/delete_pad.html'
 
 
 class RigPositionView(ListView):
-    model = RigPosition
     template_name = 'dvizhenie/rig_position.html'
     context_object_name = 'rig_positions'
+    model = RigPosition
+    fields = '__all__'
 
 
 class RigPositionUpdateView(UpdateView):
     model = RigPosition
-    fields = ('end_date',)
-    template_name = 'dvizhenie/rig_position.html'
+    form_class = RigPositionForm
+    context_object_name = 'rig_position'
+    template_name = 'dvizhenie/update_rig_position.html'
     pk_url_kwarg = 'pk'
     success_url = reverse_lazy('rig_position')
 
@@ -99,6 +102,3 @@ def next_position(request):
     return render(request, 'dvizhenie/result_of_definition.html',
                   {'results_of_definition': results_of_definition})
 
-
-def auth(request):
-    return render(request, 'dvizhenie/OAuth.html')

@@ -1,0 +1,31 @@
+{% extends 'dvizhenie/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container px-3 py-1">
+    <div class="row">
+        <form method="post">
+            {% csrf_token %}
+
+            {{ form|crispy }}
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-secondary">Подтвердить</button>
+                <a class="btn btn-outline-secondary" href="{% url 'rig' %}" role="button">Назад к списку</a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+    $("#id_type").select2();
+    $("#id_contractor").select2();
+    $("#id_mud").select2();
+</script>
+
+{% endblock %}

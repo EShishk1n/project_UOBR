@@ -1,0 +1,21 @@
+{% extends 'dvizhenie/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container px-3 py-1">
+    <div class="row">
+        <form method="post">
+            {% csrf_token %}
+            <p class="lead mt-3">Вы уверены, что хотите удалить кустовую площадку <a
+                    class="link-danger">{{pad.number}}</a> <a class="link-danger">{{pad.field}}</a></p>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-secondary">Подтвердить удаление</button>
+                <a class="btn btn-outline-secondary" href="{% url 'pad' %}" role="button">Назад к списку</a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+
+{% endblock %}

@@ -1,43 +1,56 @@
 {% extends 'dvizhenie/base.html' %}
 
 {% block content %}
-<div class="row"><h3>Кустовые площадки</h3></div>
+<div class="container px-3 py-1">
+    <div class="row">
+        <h1 class="display-6 fw-bold mt-2">Кустовые площадки</h1>
+        <div class="col-lg-12 mx-auto">
+            <p class="lead mb-4">Представлен список кустовых площадок, отсыпанных под эксплуатационные скважины на
+                объектах Общества</p>
+            <p class="lead mt-3"><a href="{% url 'pad_add' %}" class="link-secondary">Добавить кустовую площадку </a>(запланированную
+                к отсыпке/отсыпанную)</p>
+        </div>
 
-<div class="row">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Номер</th>
-                <th>Месторождение</th>
-                <th>1 этап</th>
-                <th>2 этап</th>
-                <th>Трузоподъемность</th>
-                <th>Тип раствора</th>
-                <th>ГС</th>
-                <th>ННС</th>
-                <th>Примечание</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for pad in pads %}
+
+        <div class="row">
+            <table class="table">
+                <thead class="table-dark">
                 <tr>
-                    <td>{{pad.number}}</td>
+                    <th scope="col">КП</th>
+                    <th scope="col">Месторождение</th>
+                    <th scope="col">1 этап</th>
+                    <th scope="col">2 этап</th>
+                    <th scope="col">Грузоподъемность</th>
+                    <th scope="col">Тип раствора</th>
+                    <th scope="col">ГС</th>
+                    <th scope="col">ННС</th>
+                    <th scope="col">Маркер</th>
+                    <th scope="col">Действия</th>
+                </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                {% for pad in pads %}
+                <tr>
+                    <th scope="row">{{pad.number}}</th>
                     <td>{{pad.field}}</td>
-                    <td>{{pad.first_stage_date}}</td>
-                    <td>{{pad.second_stage_date}}</td>
+                    <td>{{pad.first_stage_date|date:"d.m.Y"}}</td>
+                    <td>{{pad.second_stage_date|date:"d.m.Y"}}</td>
                     <td>{{pad.required_capacity}}</td>
                     <td>{{pad.required_mud}}</td>
                     <td>{{pad.gs_quantity}}</td>
                     <td>{{pad.nns_quantity}}</td>
                     <td>{{pad.marker}}</td>
+                    <td>
+                        <div class="button-group">
+                            <a href="{% url 'pad_update' pad.id %}" class="link-secondary">Изменить</a>
+                            <a href="{% url 'pad_delete' pad.id %}" class="link-danger">Удалить</a>
+                        </div>
+                    </td>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <form class="form-inline" action="" method="post">
-        {% csrf_token %}
-        {{form}}
-        <input type="submit">
-    </form>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 {% endblock %}

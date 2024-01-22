@@ -9,7 +9,7 @@
             {{ form|crispy }}
             <div class="d-grid gap-2">
                 <button type="submit" class="btn btn-secondary">Подтвердить</button>
-                <a class="btn btn-outline-secondary" href="{% url 'rig' %}" role="button">Назад к списку</a>
+                <a class="btn btn-outline-secondary" href="{% url 'pad' %}" role="button">Назад к списку</a>
             </div>
 
         </form>
@@ -22,10 +22,10 @@
 {% block scripts %}
 
 <script>
-    $("#id_type").select2();
-    $("#id_contractor").select2();
-    $("#id_mud").select2();
-    $("#id_pad").select2();
+    $("#id_field").select2();
+    $("#id_required_capacity").select2();
+    $("#id_required_mud").select2();
+    $("#id_marker").select2();
 </script>
 
 {% endblock %}
