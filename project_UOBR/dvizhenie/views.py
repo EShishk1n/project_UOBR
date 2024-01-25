@@ -1,10 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 
 from .forms import DrillingRigForm, PadForm, RigPositionForm
-from .models import DrillingRig, Pad, RigPosition, NextPosition
+from .models import DrillingRig, Pad, RigPosition, NextPosition, PositionRating
 from .services.define_position import define_position_and_put_into_BD
 from .services.services import get_info_from_BD
 
@@ -93,12 +93,21 @@ class RigPositionUpdateView(UpdateView):
 #     context_object_name = 'rig_positions'
 
 
-def next_position(request):
-    if request.method == "POST":
-        define_position_and_put_into_BD()
+def define_next_position(request):
+    define_position_and_put_into_BD()
+    return redirect("next_position")
 
-    results_of_definition = get_info_from_BD(NextPosition)
 
-    return render(request, 'dvizhenie/result_of_definition.html',
-                  {'results_of_definition': results_of_definition})
+class NextPositionView(ListView):
+    template_name = 'dvizhenie/next_position.html'
+    context_object_name = 'next_positions'
+    model = NextPosition
+    fields = '__all__'
 
+
+class PositionRatingView(DetailView):
+    template_name = 'dvizhenie/position_rating.html'
+    context_object_name = 'position_rating'
+    model = PositionRating
+    fields = '__all__'
+    pk_url_kwarg = 'pk'

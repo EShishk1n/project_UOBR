@@ -32,5 +32,7 @@ urlpatterns = [
     path('pad/<int:pk>/delete', views.PadDeleteView.as_view(), name='pad_delete'),
     path('rig_position', views.RigPositionView.as_view(), name='rig_position'),
     path('rig_position/<int:pk>', views.RigPositionUpdateView.as_view(), name='rig_position_update'),
-    path('next_position', views.next_position, name='next_position'),
+    path('next_position', views.NextPositionView.as_view(), name='next_position'),
+    path('define_next_position', views.define_next_position, name='define_next_position'),
+    path('next_position/<int:pk>', views.PositionRatingView.as_view(), name='position_rating'),
 ]

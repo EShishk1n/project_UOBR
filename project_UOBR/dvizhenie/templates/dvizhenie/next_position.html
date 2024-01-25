@@ -1,0 +1,80 @@
+{% extends 'dvizhenie/base.html' %}
+
+{% block content %}
+<div class="container px-3 py-1">
+    <div class="row">
+        <h1 class="display-6 fw-bold mt-2">Определение движения буровых установок</h1>
+        <div class="col-lg-12 mx-auto">
+            <p class="lead mb-2">Представлены предлагаемые пары <a style="background: #f5f5f5">буровая установка</a> -
+                <a style="background: #f0fff0">следующая кустовая площадка.</a></p>
+            <p class="lead mb-4"> Расчет произведен на основании рейтинговой системы, учитывающей готовность,
+                грузоподъемность, логистику, технологию, стратегию.</p>
+            <p class="lead mb-4"><a href="{% url 'define_next_position' %}" class="link-primary">Обновить расчет</a></p>
+        </div>
+
+
+        <div class="row">
+            <table class="table" style="font-size: 13px;">
+                <thead class="table-dark">
+                <tr>
+                    <th scope="col">Тип БУ</th>
+                    <th scope="col">ГП</th>
+                    <th scope="col">Подрядчик</th>
+                    <th scope="col">БР</th>
+                    <th scope="col">Окончание бурения</th>
+                    <th scope="col">С куста</th>
+                    <th scope="col"></th>
+                    <th scope="col">На куст</th>
+                    <th scope="col">1 этап</th>
+                    <th scope="col">2 этап</th>
+                    <th scope="col">БР</th>
+                    <th scope="col">ГП</th>
+                    <th scope="col">ГС+ННС</th>
+                    <th scope="col">Маркер</th>
+                    <th scope="col">Статус</th>
+                    <th scope="col">Действия</th>
+                </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                {% for next_position_ in next_positions %}
+                <tr>
+                    <td style="background-color: #f5f5f5">{{next_position_.current_position.drilling_rig.type}}</td>
+                    <td style="background-color: #f5f5f5">{{next_position_.current_position.drilling_rig.capacity}}</td>
+                    <td style="background-color: #f5f5f5">{{next_position_.current_position.drilling_rig.contractor}}
+                    </td>
+                    <td style="background-color: #f5f5f5">{{next_position_.current_position.drilling_rig.mud}}</td>
+                    <td style="background-color: #f5f5f5">{{next_position_.current_position.end_date|date:"d.m.Y"}}</td>
+                    <th scope="row" style="background-color: #f5f5f5">{{next_position_.current_position.pad.number}}
+                        {{next_position_.current_position.pad.field}}
+                    </th>
+                    <td> &#8594;</td>
+                    <th scope="row" style="background-color: #f0fff0">{{next_position_.next_position.number}}
+                        {{next_position_.next_position.field}}
+                    </th>
+                    <td style="background-color: #f0fff0">
+                        {{next_position_.next_position.first_stage_date|date:"d.m.Y"}}
+                    </td>
+                    <td style="background-color: #f0fff0">
+                        {{next_position_.next_position.second_stage_date|date:"d.m.Y"}}
+                    </td>
+                    <td style="background-color: #f0fff0">{{next_position_.next_position.required_mud}}</td>
+                    <td style="background-color: #f0fff0">{{next_position_.next_position.required_capacity}}</td>
+                    <td style="background-color: #f0fff0">{{next_position_.next_position.gs_quantity}} +
+                        {{next_position_.next_position.nns_quantity}}
+                    </td>
+                    <td style="background-color: #f0fff0">{{next_position_.next_position.marker}}</td>
+                    <td>{{next_position_.status}}</td>
+                    <td>
+                        <div class="button-group">
+                            <a href="#" class="link-secondary">Изменить</a>
+                            <a href="{% url 'position_rating' positionrating.id %}" class="link-secondary">Рейтинг</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
