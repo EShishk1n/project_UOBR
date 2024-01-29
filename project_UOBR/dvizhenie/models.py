@@ -23,7 +23,6 @@ class Contractor(models.Model):
 class Mud(models.TextChoices):
     """Типы применяемых буровых растворов"""
 
-    default = '', 'Выберите тип бурового раствора'
     ruo = 'РУО', 'РУО'
     rvo = 'РВО', 'РВО'
 
@@ -31,7 +30,6 @@ class Mud(models.TextChoices):
 class Field(models.TextChoices):
     """Основные месторождения на проекте РН-ЮНГ"""
 
-    default = '', 'Выберите месторождение'
     VS = 'ВС', 'Восточно-Сургутское'
     VTK = 'ВТК', 'Восточно-Токайское'
     VPR = 'ВПР', 'Восточно-Правдинское'
@@ -68,9 +66,9 @@ class Field(models.TextChoices):
 class DrillingRig(models.Model):
     """Буровые установки с основной информацией"""
 
-    type = models.ForeignKey(type_of_DR, on_delete=models.CASCADE, default=type_of_DR.type)
+    type = models.ForeignKey(type_of_DR, on_delete=models.CASCADE)
     number = models.CharField(unique=True)
-    contractor = models.ForeignKey(Contractor, on_delete=models.CASCADE, default=Contractor.contractor)
+    contractor = models.ForeignKey(Contractor, on_delete=models.CASCADE)
     mud = models.CharField(choices=Mud.choices)
 
     def capacity(self) -> int:
@@ -94,20 +92,20 @@ class Pad(models.Model):
     """Кустовые площадки с основной информацией"""
 
     class Capacity(models.IntegerChoices):
-        default = int(), 'Выберите требуемую грузоподъемность'
         very_heavy = 400, '400'
         heavy = 320, '320'
         less_than_heavy = 270, '270'
         middle = 250, '250'
         less_than_middle = 225, '225'
         light = 200, '200'
+        new = 0, '0'
 
     number = models.CharField(unique=True)
-    field = models.CharField(choices=Field.choices, null=False, blank=False, default=Field.default)
-    first_stage_date = models.DateField(null=False, blank=False)
-    second_stage_date = models.DateField(null=False, blank=False)
-    required_capacity = models.IntegerField(choices=Capacity.choices, null=False, blank=False, default=Capacity.default)
-    required_mud = models.CharField(choices=Mud.choices, null=False, blank=False, default=Mud.default)
+    field = models.CharField(choices=Field.choices, null=False, blank=True)
+    first_stage_date = models.DateField(null=False, blank=True)
+    second_stage_date = models.DateField(null=False, blank=True)
+    required_capacity = models.IntegerField(choices=Capacity.choices)
+    required_mud = models.CharField(choices=Mud.choices, null=False, blank=True)
     gs_quantity = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(24)])
     nns_quantity = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(24)])
 
@@ -118,6 +116,7 @@ class Pad(models.Model):
         priority = 'приоритет', 'приоритетное движение'
 
     marker = models.CharField(choices=marker.choices, default=marker.ordinary)
+    status = models.CharField(default='')
 
     class Meta:
         ordering = ['first_stage_date']
@@ -144,7 +143,7 @@ class RigPosition(models.Model):
 class NextPosition(models.Model):
     """Пары буровая-следущий куст"""
 
-    current_position = models.ForeignKey(RigPosition, on_delete=models.CASCADE)
+    current_position = models.OneToOneField(RigPosition, on_delete=models.CASCADE)
     next_position = models.OneToOneField(Pad, null=True, blank=True, on_delete=models.CASCADE)
     status = models.CharField(default='')
 
@@ -173,4 +172,3 @@ class PositionRating(models.Model):
 
     def __str__(self):
         return str(f'{self.current_position} {self.next_position} {self.common_rating}')
-

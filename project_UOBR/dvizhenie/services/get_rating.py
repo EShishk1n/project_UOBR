@@ -8,7 +8,11 @@ from .dop_inf import for_m_e_rating
 def get_ratings_and_put_into_BD() -> None:
     """Получает рейтинг для каждой пары буровая установка-куст"""
 
-    free_pads = _get_free_pads()
+    _get_status_to_pads()
+
+    free_pads = (Pad.objects.exclude(status='drilling_or_drilled_pad') &
+                 Pad.objects.exclude(status='commited_next_positions'))
+
     rigs_for_define_next_position = _get_rigs_for_define_next_position()
 
     for rig_for_define_next_position in rigs_for_define_next_position:
@@ -16,24 +20,13 @@ def get_ratings_and_put_into_BD() -> None:
             _get_rating_and_put_into_BD(rig_for_define_next_position, free_pad)
 
 
-def _get_free_pads() -> list:
-    """Получает список свободных кустов"""
-
-    free_pads = []
-    booked_pads = list(RigPosition.objects.all().values_list('pad'))
-    all_the_pads = Pad.objects.all()
-    for pad in all_the_pads:
-        if (pad.id,) not in booked_pads:
-            free_pads.append(pad)
-    return free_pads
-
-
 def _get_rigs_for_define_next_position() -> QuerySet:
     """Получает список буровых установок, которые выйдут из бурения в течении следующих 3 месяцев, для определения
     последующего движения"""
 
     month_for_defenition = date.today().month
-    return RigPosition.objects.filter(end_date__month__range=(month_for_defenition, int(month_for_defenition) + 3))
+    return RigPosition.objects.filter(
+        end_date__month__range=(month_for_defenition, int(month_for_defenition) + 3)).order_by('end_date')
 
 
 def _get_rating_and_put_into_BD(rig_for_define_next_position: RigPosition, free_pad: Pad) -> None:
@@ -211,29 +204,28 @@ def _get_marker_rating(rig_for_define_next_position: RigPosition, free_pad: Pad)
     """Определяет рейтинг для нетиповых случаев (нестандартная буровая установка, буровой подрядчик - СНПХ,
     приоритетное бурение кустовой площадки"""
 
-    rig_type = str(rig_for_define_next_position.drilling_rig.type)
-    rig_contractor = str(rig_for_define_next_position.drilling_rig.contractor)
-    marker = str(free_pad.marker)
+    marker_for_drilling_rig = _get_marker_for_drilling_rig(rig_for_define_next_position)
+    marker_for_pad = str(free_pad.marker)
 
-    if rig_type == 'ZJ-50 2эш':
-        if marker == 'для 2эш':
+    if marker_for_drilling_rig == 'ZJ-50 2эш':
+        if marker_for_pad == 'для 2эш':
             marker_rating = 10
         else:
             marker_rating = 0
 
-    elif rig_type == 'ZJ-50 0.5эш':
+    elif marker_for_drilling_rig == 'ZJ-50 0.5эш':
         if free_pad.gs_quantity + free_pad.nns_quantity <= 8:
             marker_rating = 10
         else:
             marker_rating = 0
 
-    elif rig_contractor == "СНПХ":
-        if marker == 'СНПХ':
+    elif marker_for_drilling_rig == "СНПХ":
+        if marker_for_pad == 'СНПХ':
             marker_rating = 10
         else:
             marker_rating = 0
 
-    elif marker == 'приоритет':
+    elif marker_for_pad == 'приоритет':
         marker_rating = 10
 
     else:
@@ -242,44 +234,108 @@ def _get_marker_rating(rig_for_define_next_position: RigPosition, free_pad: Pad)
     return marker_rating
 
 
+def _get_marker_for_drilling_rig(rig_for_define_next_position: RigPosition) -> str:
+    """Получает информацию о маркере буровой установки"""
+
+    rig_type = str(rig_for_define_next_position.drilling_rig.type)
+    rig_contractor = str(rig_for_define_next_position.drilling_rig.contractor)
+
+    if rig_type in ('ZJ-50 2эш', 'ZJ-50 0.5эш'):
+        marker_for_rig_position = rig_type
+
+    elif rig_contractor == 'СНПХ':
+        marker_for_rig_position = rig_contractor
+
+    else:
+        marker_for_rig_position = 'стандартная БУ'
+
+    return marker_for_rig_position
+
+
 def _get_strategy_rating(rig_for_define_next_position: RigPosition, free_pad: Pad) -> float:
     """Получает рейтинг соответствия стратегии"""
 
-    rig_contractor = str(rig_for_define_next_position.drilling_rig.contractor)
-    current_field = str(rig_for_define_next_position.pad.field)
+    RNB_department = _get_inf_about_RNB_department(rig_for_define_next_position)
     next_field = str(free_pad.field)
 
-    if rig_contractor == 'НФ РНБ':
-        # Первый УБР на ПРО
-        if current_field in ['ПРОл', 'ПРОп'] and next_field in ['ПРОл', 'ПРОп', 'ПРЗ', 'САЛ']:
-            strategy_rating = 10
-
-        # Второй УБР на Правдинском регионе
-        elif current_field in ['ПРЗ', 'САЛ'] and next_field in ['ПРЗ', 'САЛ']:
-            strategy_rating = 10
-
-        # Третий УБР на Юганском и Майском регионе
-        elif (current_field not in ['ПРОл', 'ПРОп', 'ПРЗ', 'САЛ']
-              and next_field not in ['ПРОл', 'ПРОп', 'ПРЗ', 'САЛ', 'ЭРГ']):
+    if RNB_department == 'НФ РНБ 1ый УБР':
+        # НФ РНБ первый УБР на ПРО
+        if next_field in ('ПРОл', 'ПРОп'):
             strategy_rating = 10
         else:
             strategy_rating = 1
 
-    elif rig_contractor == 'ХМФ РНБ':
-        # Первый УБР на ПРО
-        if current_field in ['ПРОл', 'ПРОп', 'ПРЗ', 'САЛ'] and next_field in ['ПРОл', 'ПРОп']:
-            strategy_rating = 10
-
-        # Четвертный УБР на Юганском, Майском, Правдинском регионе
-        elif current_field not in ['ПРОл', 'ПРОп', 'ПРЗ', 'САЛ'] and next_field not in ['ПРОл', 'ПРОп']:
+    elif RNB_department == 'НФ РНБ 2ой УБР':
+        # НФ РНБто второй УБР на Правдинском регионе
+        if next_field in ('ПРЗ', 'САЛ'):
             strategy_rating = 10
         else:
             strategy_rating = 1
 
-    elif rig_contractor in ['НвФ РНБ', 'СНПХ', 'ГПБ', 'ТБНГ', 'КСА', 'МУБР']:
-        strategy_rating = 10
+    elif RNB_department == 'НФ РНБ 3ий УБР':
+        # НФ РНБ третий УБР на Юганском и Майском регионе
+        if next_field not in ('ПРОл', 'ПРОп', 'ПРЗ', 'САЛ'):
+            strategy_rating = 10
+        else:
+            strategy_rating = 1
+
+    elif RNB_department == 'ХМФ РНБ 1ий УБР':
+        # ХМФ РНБ первый УБР на ПРО
+        if next_field in ['ПРОл', 'ПРОп']:
+            strategy_rating = 10
+        else:
+            strategy_rating = 1
+
+    elif RNB_department == 'ХМФ РНБ 4ый УБР':
+        # ХМФ РНБ четвертный УБР на Юганском, Майском, Правдинском регионе
+        if next_field not in ['ПРОл', 'ПРОп']:
+            strategy_rating = 10
+        else:
+            strategy_rating = 1
 
     else:
-        strategy_rating = 1
+        strategy_rating = 10
 
     return strategy_rating
+
+
+def _get_inf_about_RNB_department(rig_for_define_next_position: RigPosition) -> str:
+    """Получает информацию о подразделении (УБР) филиалов РН-Бурение"""
+
+    rig_contractor = str(rig_for_define_next_position.drilling_rig.contractor)
+    current_field = str(rig_for_define_next_position.pad.field)
+
+    if rig_contractor == 'НФ РНБ':
+        # Первый УБР
+        if current_field in ['ПРОл', 'ПРОп']:
+            RNB_department = 'НФ РНБ 1ый УБР'
+
+        # Второй УБР
+        elif current_field in ['ПРЗ', 'САЛ']:
+            RNB_department = 'НФ РНБ 2ой УБР'
+
+        # Третий УБР
+        else:
+            RNB_department = 'НФ РНБ 3ий УБР'
+
+    elif rig_contractor == 'ХМФ РНБ':
+        # Первый УБР
+        if current_field in ['ПРОл', 'ПРОп', 'ПРЗ', 'САЛ']:
+            RNB_department = 'ХМФ РНБ 1ый УБР'
+
+        # Четвертный УБР
+        else:
+            RNB_department = 'ХМФ РНБ 4ый УБР'
+
+    else:
+        RNB_department = 'нет стратегии'
+
+    return RNB_department
+
+
+def _get_status_to_pads():
+    """Присваивает статус 'в бурении/пробурен' кустам"""
+
+    drilling_or_drilled_pads = RigPosition.objects.all().values_list('pad')
+    for drilling_or_drilled_pad in drilling_or_drilled_pads:
+        Pad.objects.filter(id=drilling_or_drilled_pad[0]).update(status='drilling_or_drilled_pad')

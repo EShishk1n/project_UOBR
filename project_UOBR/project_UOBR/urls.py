@@ -36,4 +36,6 @@ urlpatterns = [
     path('define_next_position', views.define_next_position, name='define_next_position'),
     path('next_position/<int:pk>', views.PositionRatingDetailView.as_view(), name='position_rating'),
     path('next_position/all/<int:pk>', views.PositionRatingListView.as_view(), name='position_rating_all'),
+    path('commit_next_position/<int:pk>', views.commit_next_position, name='commit_next_position'),
+    path('commited_next_position', views.CommitedNextPositionView.as_view(), name='commited_next_position'),
 ]

@@ -7,7 +7,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView, D
 from .forms import DrillingRigForm, PadForm, RigPositionForm
 from .models import DrillingRig, Pad, RigPosition, NextPosition, PositionRating
 from .services.define_position import define_position_and_put_into_BD
-from .services.services import get_info_from_BD
+from .services.get_rating import _get_marker_for_drilling_rig, _get_inf_about_RNB_department
 
 
 def start_page(request):
@@ -44,10 +44,9 @@ class DrillingRigDeleteView(DeleteView):
 
 
 class PadView(ListView):
-    model = Pad
+    queryset = Pad.objects.exclude(status='drilling_or_drilled_pad')
     template_name = 'dvizhenie/pad.html'
     context_object_name = 'pads'
-    fields = '__all__'
 
 
 class PadAddView(CreateView):
@@ -88,22 +87,17 @@ class RigPositionUpdateView(UpdateView):
     success_url = reverse_lazy('rig_position')
 
 
-# class NextPositionView(ListView):
-#     model = NextPosition
-#     template_name = 'info/rig_position.html'
-#     context_object_name = 'rig_positions'
-
-
 def define_next_position(request):
-    define_position_and_put_into_BD()
+    if request.method == 'GET':
+        define_position_and_put_into_BD()
     return redirect("next_position")
 
 
 class NextPositionView(ListView):
     template_name = 'dvizhenie/next_position.html'
     context_object_name = 'next_positions'
-    model = NextPosition
-    fields = '__all__'
+    queryset = NextPosition.objects.filter(status='Требуется подтверждение')
+    ordering = "status"
 
 
 class PositionRatingDetailView(View):
@@ -114,26 +108,11 @@ class PositionRatingDetailView(View):
                 PositionRating.objects.filter(current_position=next_position_object.current_position.id)
                 & PositionRating.objects.filter(next_position=next_position_object.next_position.id))
 
-        marker = 'стандартная БУ'
-        if position_rating[0].current_position.drilling_rig.type in ('ZJ-50 0.5эш', 'ZJ-50 2эш'):
-            marker = position_rating[0].current_position.drilling_rig.type
-        if position_rating[0].current_position.drilling_rig.contractor == 'СНПХ':
-            marker = position_rating[0].current_position.drilling_rig.contractor
+        marker = _get_marker_for_drilling_rig(
+            rig_for_define_next_position=position_rating[0].current_position)
 
-        if position_rating[0].current_position.drilling_rig.contractor == 'НФ РНБ':
-            if position_rating[0].current_position.field in ('ПРОл', 'ПРОп'):
-                strategy = 'НФ 1ый УБР'
-            elif position_rating[0].current_position.field in ('ПРЗ', 'САЛ'):
-                strategy = 'НФ 2ой УБР'
-            else:
-                strategy = 'НФ 3ий УБР'
-        elif position_rating[0].current_position.drilling_rig.contractor == 'ХМФ РНБ':
-            if position_rating[0].current_position.field in ('ПРОл', 'ПРОп', 'ПРЗ', 'САЛ'):
-                strategy = 'ХМФ 1ый УБР'
-            else:
-                strategy = 'ХМФ 4ый УБР'
-        else:
-            strategy = position_rating[0].current_position.drilling_rig.contractor
+        strategy = _get_inf_about_RNB_department(
+            rig_for_define_next_position=position_rating[0].current_position)
 
         return render(request, 'dvizhenie/position_rating.html',
                       {"position_rating": position_rating[0], "marker": marker, "strategy": strategy})
@@ -148,3 +127,20 @@ class PositionRatingListView(View):
 
         return render(request, 'dvizhenie/position_rating_all.html',
                       {"position_rating": position_rating})
+
+
+def commit_next_position(request, pk):
+    """Подтверждает (меняет статус пары в NextPosition на 'подтверждено') следующую позицию для БУ"""
+
+    if request.method == 'GET':
+        NextPosition.objects.filter(id=pk).update(status='Подтверждено')
+        pad_id = NextPosition.objects.filter(id=pk)[0].next_position.id
+        Pad.objects.filter(id=pad_id).update(status='commited_next_positions')
+
+    return redirect('define_next_position')
+
+
+class CommitedNextPositionView(ListView):
+    template_name = 'dvizhenie/commited_next_position.html'
+    context_object_name = 'next_positions'
+    queryset = NextPosition.objects.filter(status='Подтверждено')
