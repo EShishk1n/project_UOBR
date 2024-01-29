@@ -29,7 +29,7 @@ def define_position_and_put_into_BD() -> None:
 
 
 def _clear_work_tables() -> None:
-    """Очищает рабочие таблины (предыдущие расчеты рейтинга и определения движения)"""
+    """Очищает рабочие таблицы (предыдущие расчеты рейтинга и определения движения)"""
 
     NextPosition.objects.all().delete()
     PositionRating.objects.all().delete()

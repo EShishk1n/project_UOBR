@@ -4,6 +4,7 @@ from dvizhenie.models import RigPosition, Pad, PositionRating
 from datetime import date, timedelta
 from .dop_inf import for_m_e_rating
 
+
 def get_ratings_and_put_into_BD() -> None:
     """Получает рейтинг для каждой пары буровая установка-куст"""
 
@@ -236,7 +237,7 @@ def _get_marker_rating(rig_for_define_next_position: RigPosition, free_pad: Pad)
         marker_rating = 10
 
     else:
-        marker_rating = 1
+        marker_rating = 10
 
     return marker_rating
 

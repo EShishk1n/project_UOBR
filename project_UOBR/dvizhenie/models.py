@@ -138,7 +138,7 @@ class RigPosition(models.Model):
         ordering = ['end_date']
 
     def __str__(self):
-        return str(f'{self.drilling_rig} на КП {self.pad}')
+        return str(f'{self.pad}')
 
 
 class NextPosition(models.Model):
@@ -173,3 +173,4 @@ class PositionRating(models.Model):
 
     def __str__(self):
         return str(f'{self.current_position} {self.next_position} {self.common_rating}')
+

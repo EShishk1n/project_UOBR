@@ -9,7 +9,7 @@
                 <a style="background: #f0fff0">следующая кустовая площадка.</a></p>
             <p class="lead mb-4"> Расчет произведен на основании рейтинговой системы, учитывающей готовность,
                 грузоподъемность, логистику, технологию, стратегию.</p>
-            <p class="lead mb-4"><a href="{% url 'define_next_position' %}" class="link-primary">Обновить расчет</a></p>
+            <p class="lead mb-4"><a href="{% url 'define_next_position' %}" class="link-primary"><i class="fa-solid fa-rotate-right"></i>  Обновить расчет</a></p>
         </div>
 
 
@@ -66,8 +66,8 @@
                     <td>{{next_position_.status}}</td>
                     <td>
                         <div class="button-group">
-                            <a href="#" class="link-secondary">Изменить</a>
-                            <a href="{% url 'position_rating' positionrating.id %}" class="link-secondary">Рейтинг</a>
+                            <a href="{% url 'position_rating' next_position_.id %}" class="link-secondary">Рейтинг</a>
+                            <a href="{% url 'position_rating_all' next_position_.id %}" class="link-secondary">Другие варианты</a>
                         </div>
                     </td>
                 </tr>

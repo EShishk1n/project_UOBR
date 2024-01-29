@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
+from django.views import View
 
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 
@@ -105,9 +106,45 @@ class NextPositionView(ListView):
     fields = '__all__'
 
 
-class PositionRatingView(DetailView):
-    template_name = 'dvizhenie/position_rating.html'
-    context_object_name = 'position_rating'
-    model = PositionRating
-    fields = '__all__'
-    pk_url_kwarg = 'pk'
+class PositionRatingDetailView(View):
+
+    def get(self, request, pk):
+        next_position_object = NextPosition.objects.get(id=pk)
+        position_rating = (
+                PositionRating.objects.filter(current_position=next_position_object.current_position.id)
+                & PositionRating.objects.filter(next_position=next_position_object.next_position.id))
+
+        marker = 'стандартная БУ'
+        if position_rating[0].current_position.drilling_rig.type in ('ZJ-50 0.5эш', 'ZJ-50 2эш'):
+            marker = position_rating[0].current_position.drilling_rig.type
+        if position_rating[0].current_position.drilling_rig.contractor == 'СНПХ':
+            marker = position_rating[0].current_position.drilling_rig.contractor
+
+        if position_rating[0].current_position.drilling_rig.contractor == 'НФ РНБ':
+            if position_rating[0].current_position.field in ('ПРОл', 'ПРОп'):
+                strategy = 'НФ 1ый УБР'
+            elif position_rating[0].current_position.field in ('ПРЗ', 'САЛ'):
+                strategy = 'НФ 2ой УБР'
+            else:
+                strategy = 'НФ 3ий УБР'
+        elif position_rating[0].current_position.drilling_rig.contractor == 'ХМФ РНБ':
+            if position_rating[0].current_position.field in ('ПРОл', 'ПРОп', 'ПРЗ', 'САЛ'):
+                strategy = 'ХМФ 1ый УБР'
+            else:
+                strategy = 'ХМФ 4ый УБР'
+        else:
+            strategy = position_rating[0].current_position.drilling_rig.contractor
+
+        return render(request, 'dvizhenie/position_rating.html',
+                      {"position_rating": position_rating[0], "marker": marker, "strategy": strategy})
+
+
+class PositionRatingListView(View):
+
+    def get(self, request, pk):
+        next_position_object = NextPosition.objects.get(id=pk)
+        position_rating = PositionRating.objects.filter(
+            current_position=next_position_object.current_position.id).order_by('-common_rating')
+
+        return render(request, 'dvizhenie/position_rating_all.html',
+                      {"position_rating": position_rating})
