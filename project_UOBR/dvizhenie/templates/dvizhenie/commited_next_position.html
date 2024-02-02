@@ -61,7 +61,8 @@
                     <td style="background-color: #f0fff0">{{next_position_.next_position.marker}}</td>
                     <td>
                         <div class="button-group">
-                            <a href="" class="link-secondary">Пересмотреть</a>
+                            <a href="{% url 'delete_commited_position' next_position_.id %}" class="link-secondary">Пересмотреть</a>
+                            <a href="{% url 'commit_commited_position' next_position_.id %}" class="link-secondary">Подтвердить движение</a>
                         </div>
                     </td>
                 </tr>

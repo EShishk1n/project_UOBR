@@ -14,6 +14,7 @@ def define_position_and_put_into_BD() -> None:
     for rig_for_define_next_position in rigs_for_define_next_position:
         result: [dict] = _define_next_position(rig_for_define_next_position.current_position)
 
+        print(rig_for_define_next_position, result)
         NextPosition.objects.filter(current_position=rig_for_define_next_position.current_position).update(
             status=result['status'])
         NextPosition.objects.filter(current_position=rig_for_define_next_position.current_position).update(
@@ -39,7 +40,8 @@ def _define_sequence_of_rigs_for_definition_positions() -> list:
 
     _put_rigs_for_define_in_NextPosition()
 
-    rigs_for_define_next_position = NextPosition.objects.exclude(status='Подтверждено')
+    rigs_for_define_next_position = (NextPosition.objects.exclude(status='Подтверждено') &
+                                     NextPosition.objects.exclude(status='Изменено. Требуется подтверждение'))
 
     light_rigs = []
     less_than_middle_rigs = []
@@ -81,8 +83,12 @@ def _define_next_position(rig_for_define_next_position: RigPosition) -> dict:
 
     else:
         next_position = positions.first().next_position
-        PositionRating.objects.filter(next_position=next_position).update(status='booked')
         status = 'Требуется подтверждение'
+        PositionRating.objects.filter(next_position=next_position).update(status='booked')
+
+        if {'next_position': next_position.id} in NextPosition.objects.filter(
+                status='Изменено. Требуется подтверждение').values('next_position'):
+            _define_next_position(rig_for_define_next_position)
 
     return {'next_position': next_position, 'status': status}
 

@@ -9,7 +9,8 @@
                 <a style="background: #f0fff0">следующая кустовая площадка.</a></p>
             <p class="lead mb-4"> Расчет произведен на основании рейтинговой системы, учитывающей готовность,
                 грузоподъемность, логистику, технологию, стратегию.</p>
-            <p class="lead mb-4"><a href="{% url 'define_next_position' %}" class="link-primary"><i class="fa-solid fa-rotate-right"></i>  Обновить расчет</a></p>
+            <p class="lead mb-4"><a href="{% url 'define_next_position' %}" class="link-primary"><i
+                    class="fa-solid fa-rotate-right"></i> Обновить расчет</a></p>
         </div>
 
 
@@ -65,16 +66,34 @@
                     <td style="background-color: #f0fff0">{{next_position_.next_position.marker}}</td>
                     <td>{{next_position_.status}}</td>
                     <td>
-                        <div class="button-group">
-                            <a href="{% url 'position_rating' next_position_.id %}" class="link-secondary">Рейтинг</a>
-                            <a href="{% url 'position_rating_all' next_position_.id %}" class="link-secondary">Другие варианты</a>
-                            <a href="{% url 'commit_next_position' next_position_.id %}" class="link-secondary">Подтвердить</a>
+                        <div class="button-group nav-item dropdown">
+                            <a class="link-secondary dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-list"></i>
+                            </a>
+                            <ul class="dropdown-menu" style="font-size:13px">
+                                <li class="top-menu"><a class="dropdown-item link-secondary"
+                                                        href="{% url 'position_rating' next_position_.id %}">Рейтинг</a>
+                                </li>
+                                <li class="top-menu"><a class="dropdown-item link-secondary"
+                                                        href="{% url 'position_rating_all' next_position_.id %}">Другие
+                                    варианты</a></li>
+                                <li class="top-menu"><a class="dropdown-item link-secondary"
+                                                        href="{% url 'commit_next_position' next_position_.id %}">Подтвердить</a>
+                                </li>
+                                <li class="top-menu"><a class="dropdown-item link-secondary"
+                                                        href="{% url 'delete_next_position' next_position_.id %}">Сбросить</a>
+                                </li>
+                            </ul>
                         </div>
                     </td>
                 </tr>
                 {% endfor %}
                 </tbody>
             </table>
+            <div class="col-lg-12 mx-auto">
+                <p class="lead mb-4"><a href="{% url 'commited_next_position' %}" class="link-secondary">Перейти к
+                    подтвержденным парам</a></p>
+            </div>
         </div>
     </div>
 </div>

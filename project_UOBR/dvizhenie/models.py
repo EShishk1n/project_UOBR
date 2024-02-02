@@ -130,8 +130,8 @@ class RigPosition(models.Model):
 
     drilling_rig = models.ForeignKey(DrillingRig, on_delete=models.CASCADE)
     pad = models.ForeignKey(Pad, on_delete=models.CASCADE)
-    start_date = models.DateField()
-    end_date = models.DateField()
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
 
     class Meta:
         ordering = ['end_date']

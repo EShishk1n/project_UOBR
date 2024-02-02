@@ -1,6 +1,10 @@
+from datetime import date
+
+import django
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
+from django.db.utils import IntegrityError
 
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 
@@ -96,7 +100,10 @@ def define_next_position(request):
 class NextPositionView(ListView):
     template_name = 'dvizhenie/next_position.html'
     context_object_name = 'next_positions'
-    queryset = NextPosition.objects.filter(status='Требуется подтверждение')
+    queryset = (NextPosition.objects.filter(status='Требуется подтверждение') |
+                NextPosition.objects.filter(status='Изменено. Требуется подтверждение') |
+                NextPosition.objects.filter(status='Отсутствют кандидаты') |
+                NextPosition.objects.filter(status='Удалено пользователем'))
     ordering = "status"
 
 
@@ -140,7 +147,61 @@ def commit_next_position(request, pk):
     return redirect('define_next_position')
 
 
+def change_next_position(request, pk):
+    """Берет из рейтинга другую позицию для БУ и вставляет в NextPosition со статусом
+    'Изменено. Требуется подтверждение'"""
+
+    if request.method == 'GET':
+        different_next_position = PositionRating.objects.filter(id=pk)[0]
+        try:
+            NextPosition.objects.filter(current_position=different_next_position.current_position).update(
+                next_position=different_next_position.next_position)
+        except IntegrityError:
+            NextPosition.objects.filter(next_position=different_next_position.next_position).update(next_position=None)
+            NextPosition.objects.filter(current_position=different_next_position.current_position).update(
+                next_position=different_next_position.next_position)
+        finally:
+            NextPosition.objects.filter(current_position=different_next_position.current_position).update(
+                status='Изменено. Требуется подтверждение')
+
+    return redirect('next_position')
+
+
+def delete_next_position(request, pk):
+    """Удаляет текущее предложение NextPosition"""
+
+    if request.method == 'GET':
+        NextPosition.objects.filter(id=pk).update(next_position=None)
+        NextPosition.objects.filter(id=pk).update(status='Удалено пользователем')
+
+    return redirect('next_position')
+
+
 class CommitedNextPositionView(ListView):
     template_name = 'dvizhenie/commited_next_position.html'
     context_object_name = 'next_positions'
     queryset = NextPosition.objects.filter(status='Подтверждено')
+
+
+def delete_commited_position(request, pk):
+    """Меняет статус подтвержденной пары на 'Требуется подтверждение'"""
+
+    if request.method == 'GET':
+        next_position = NextPosition.objects.filter(id=pk)
+        next_position.update(status='Требуется подтверждение')
+        Pad.objects.filter(id=next_position[0].next_position.id).update(status='')
+        next_position.delete()
+    return redirect('commited_next_position')
+
+
+def commit_commited_position(request, pk):
+    """Переносит пару из подтвержденных позиций (актуальное движение) в расположение БУ"""
+
+    if request.method == 'GET':
+        next_position = NextPosition.objects.filter(id=pk)
+        drilling_rig = next_position[0].current_position.drilling_rig
+        pad = next_position[0].next_position
+
+        RigPosition(drilling_rig=drilling_rig, pad=pad).save()
+
+    return redirect('commited_next_position')
