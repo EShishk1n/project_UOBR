@@ -1,3 +1,4 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
@@ -172,3 +173,4 @@ class PositionRating(models.Model):
 
     def __str__(self):
         return str(f'{self.current_position} {self.next_position} {self.common_rating}')
+

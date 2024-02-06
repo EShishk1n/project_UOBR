@@ -61,9 +61,11 @@
                     <td style="background-color: #f0fff0">{{position_rating_.next_position.marker}}</td>
                     <td>{{position_rating_.common_rating}}</td>
                     <td>
+                        {% if perms.dvizhenie.change_nextposition %}
                         <div class="button-group">
                             <a href="{% url 'change_next_position' position_rating_.id %}" class="link-secondary">Выбрать</a>
                         </div>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}

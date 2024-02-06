@@ -7,8 +7,11 @@
         <div class="col-lg-12 mx-auto">
             <p class="lead mb-4">Представлен список буровых установок, производящих работы по бурению скважин на
                 объектах Общества</p>
+
+            {% if perms.dvizhenie.add_drillingrig %}
             <p class="lead mt-3" ><a href="{% url 'rig_add' %}" class="link-secondary">Добавить буровую установку </a>(в
                     случае мобилизации)</p>
+            {% endif %}
         </div>
 
 
@@ -32,8 +35,10 @@
                     <td>{{rig.mud}}</td>
                     <td>
                         <div class="button-group">
+                            {% if perms.dvizhenie.add_drillingrig %}
                             <a href="{% url 'rig_update' rig.id %}" class="link-secondary">Изменить</a>
                             <a href="{% url 'rig_delete' rig.id %}" class="link-danger">Удалить</a>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>

@@ -9,8 +9,10 @@
                 <a style="background: #f0fff0">следующая кустовая площадка.</a></p>
             <p class="lead mb-4"> Расчет произведен на основании рейтинговой системы, учитывающей готовность,
                 грузоподъемность, логистику, технологию, стратегию.</p>
+            {% if perms.dvizhenie.change_nextposition %}
             <p class="lead mb-4"><a href="{% url 'define_next_position' %}" class="link-primary"><i
                     class="fa-solid fa-rotate-right"></i> Обновить расчет</a></p>
+            {% endif %}
         </div>
 
 
@@ -77,12 +79,14 @@
                                 <li class="top-menu"><a class="dropdown-item link-secondary"
                                                         href="{% url 'position_rating_all' next_position_.id %}">Другие
                                     варианты</a></li>
+                                {% if perms.dvizhenie.change_nextposition %}
                                 <li class="top-menu"><a class="dropdown-item link-secondary"
                                                         href="{% url 'commit_next_position' next_position_.id %}">Подтвердить</a>
                                 </li>
                                 <li class="top-menu"><a class="dropdown-item link-secondary"
                                                         href="{% url 'delete_next_position' next_position_.id %}">Сбросить</a>
                                 </li>
+                                {% endif %}
                             </ul>
                         </div>
                     </td>

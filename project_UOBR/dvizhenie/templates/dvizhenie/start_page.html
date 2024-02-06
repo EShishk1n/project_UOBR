@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block content %}
+
 <div class="container px-4 py-1 text-center ">
     <div class="row">
         <div class="col-lg-6 mx-auto">
@@ -17,7 +18,8 @@
             <p class="lead mb-4">Приложение для оптимизации работы по определению движения буровых установок</p>
         </div>
         <div class="col-lg-12 mx-auto">
-            <p class="lead mb-4"><a href="{% url 'commited_next_position' %}" class="link-secondary">Перейти к актуальной информации</a></p>
+            <p class="lead mb-4"><a href="{% url 'commited_next_position' %}" class="link-secondary">Перейти к
+                актуальной информации</a></p>
         </div>
     </div>
 </div>
@@ -27,10 +29,10 @@
         <div class="col-lg-4 col-sm-12">
             <div class="product-card">
                 <div class="product-thumb">
-                    <a href="#"><img src="{% static 'dvizhenie/img/drilling_rig.jpg' %}"></a>
+                    <a href="{% url 'rig' %}"><img src="{% static 'dvizhenie/img/drilling_rig.jpg' %}"></a>
                 </div>
                 <div class="product-details">
-                    <h4><a href="#">Буровые установки</a></h4>
+                    <h4><a href="{% url 'rig' %}">Буровые установки</a></h4>
                     <div class="product-bottom-details">
                         <div class="product-links">
                             <a href="{% url 'rig' %}">Парк БУ</a><br/>
@@ -45,10 +47,10 @@
         <div class="col-lg-4 col-sm-12">
             <div class="product-card">
                 <div class="product-thumb">
-                    <a href="#"><img src="{% static 'dvizhenie/img/pad.jpg' %}"></a>
+                    <a href="{% url 'pad' %}"><img src="{% static 'dvizhenie/img/pad.jpg' %}"></a>
                 </div>
                 <div class="product-details">
-                    <h4><a href="#">Кустовые площадки</a></h4>
+                    <h4><a href="{% url 'pad' %}">Кустовые площадки</a></h4>
                     <div class="product-bottom-details">
                         <div class="product-links">
                             <a href="{% url 'pad' %}">Готовность кустовых площадок</a><br/>
@@ -63,10 +65,10 @@
         <div class="col-lg-4 col-sm-12">
             <div class="product-card">
                 <div class="product-thumb">
-                    <a href="#"><img src="{% static 'dvizhenie/img/map.jpg' %}"></a>
+                    <a href="{% url 'commited_next_position' %}"><img src="{% static 'dvizhenie/img/map.jpg' %}"></a>
                 </div>
                 <div class="product-details">
-                    <h4><a href="#">Движение БУ</a></h4>
+                    <h4><a href="{% url 'commited_next_position' %}">Движение БУ</a></h4>
                     <div class="product-bottom-details">
                         <div class="product-links">
                             <a href="{% url 'commited_next_position' %}">Актуальная информация</a><br/>

@@ -1,6 +1,6 @@
 from django import forms
-
-
+from django.contrib.auth.forms import UserChangeForm, AuthenticationForm
+from django.utils.translation import gettext_lazy as _
 from dvizhenie.models import DrillingRig, Pad, RigPosition
 
 
@@ -36,7 +36,8 @@ class PadForm(forms.ModelForm):
 class RigPositionForm(forms.ModelForm):
     class Meta:
         model = RigPosition
-        fields = ('end_date',)
+        fields = ('start_date', 'end_date')
         labels = {
-            'end_date': '',
+            'start_date': 'Начало бурения',
+            'end_date': 'Окончание бурения',
         }

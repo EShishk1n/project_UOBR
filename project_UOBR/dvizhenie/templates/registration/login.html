@@ -1,0 +1,41 @@
+{% extends 'registration/base_reg.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<div class="container px-5 py-1">
+    <div class="col-lg-6 mx-auto">
+        {% if form.errors %}
+        <p class="lead mt-3"><a class="link-danger">Некорректный логин или пароль. Попробуйте снова.</a></p>
+        {% endif %}
+        {% if next %}
+        {% if user.is_authenticated %}
+        <p class="lead mt-3"><a class="link-danger">У вас нет доступа к этой странице. Для просмотра необходимо
+            авторизоваться.</a></p>
+        {% else %}
+        <p class="lead mt-3"><a class="link-danger">Для просмотра необходимо авторизоваться.</a></p>
+        {% endif %}
+        {% endif %}
+        <main class="form-signin">
+            <form method="post" action="{% url 'login' %}">
+                <h1 class="h3 mb-3 fw-normal">Вход</h1>
+                {% csrf_token %}
+                <div id="div_id_username" class="mb-3"><label for="id_username" class="form-label requiredField">
+                    Логин<span class="asteriskField">*</span> </label> <input type="text" name="username" autofocus
+                                                                                 autocapitalize="none"
+                                                                                 autocomplete="username" maxlength="150"
+                                                                                 class="textinput form-control" required
+                                                                                 id="id_username"></div>
+                <div id="div_id_password" class="mb-3"><label for="id_password" class="form-label requiredField">
+                    Пароль<span class="asteriskField">*</span> </label> <input type="password" name="password"
+                                                                                 autocomplete="current-password"
+                                                                                 class="passwordinput form-control"
+                                                                                 required id="id_password"></div>
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-secondary">Войти</button>
+                </div>
+            </form>
+        </main>
+    </div>
+</div>
+{% endblock %}

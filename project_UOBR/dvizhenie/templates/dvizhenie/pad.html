@@ -7,8 +7,10 @@
         <div class="col-lg-12 mx-auto">
             <p class="lead mb-4">Представлен список кустовых площадок, отсыпанных под эксплуатационные скважины на
                 объектах Общества</p>
+            {% if perms.dvizhenie.add_pad %}
             <p class="lead mt-3"><a href="{% url 'pad_add' %}" class="link-secondary">Добавить кустовую площадку </a>(запланированную
                 к отсыпке/отсыпанную)</p>
+            {% endif %}
         </div>
 
 
@@ -42,8 +44,10 @@
                     <td>{{pad.marker}}</td>
                     <td>
                         <div class="button-group">
+                            {% if perms.dvizhenie.add_pad %}
                             <a href="{% url 'pad_update' pad.id %}" class="link-secondary">Изменить</a>
                             <a href="{% url 'pad_delete' pad.id %}" class="link-danger">Удалить</a>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>

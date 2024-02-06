@@ -16,10 +16,11 @@
                 <thead class="table-dark">
                 <tr>
                     <th scope="col">Тип БУ</th>
+                    <th scope="col">зав.№</th>
                     <th scope="col">Подрядчик</th>
                     <th scope="col">Номер куста</th>
                     <th scope="col">Месторождение</th>
-                    <th scope="col">Количество скважин (ГС+ННС)</th>
+                    <th scope="col">Дата начала бурения</th>
                     <th scope="col">Дата окончания бурения</th>
                     <th scope="col">Действия</th>
                 </tr>
@@ -28,14 +29,17 @@
                 {% for rig_position in rig_positions %}
                 <tr>
                     <td>{{rig_position.drilling_rig.type}}</td>
+                    <td>{{rig_position.drilling_rig.number}}</td>
                     <td>{{rig_position.drilling_rig.contractor}}</td>
                     <td>{{rig_position.pad.number}}</td>
                     <td>{{rig_position.pad.field}}</td>
-                    <td>{{rig_position.pad.gs_quantity}} + {{rig_position.pad.nns_quantity}}</td>
+                    <th scope="col">{{rig_position.start_date|date:"d.m.Y"}}</th>
                     <th scope="col">{{rig_position.end_date|date:"d.m.Y"}}</th>
                     <td>
                         <div class="button-group">
+                            {% if perms.dvizhenie.change_rigposition %}
                             <a href="{% url 'rig_position_update' rig_position.id %}" class="link-secondary">Изменить</a>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>
