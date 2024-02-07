@@ -1,0 +1,108 @@
+{% extends 'dvizhenie/base.html' %}
+
+{% block content %}
+<div class="container px-3 py-1">
+    <div class="row">
+        <h1 class="display-6 fw-bold mt-2">Поиск</h1>
+
+        <div class="col-lg-12 mx-auto">
+            <p class="lead mt-3">Кустовыe площадки</p>
+        </div>
+        <div class="row">
+            <table class="table">
+                <thead class="table-dark">
+                <tr>
+                    <th scope="col">КП</th>
+                    <th scope="col">Месторождение</th>
+                    <th scope="col">1 этап</th>
+                    <th scope="col">2 этап</th>
+                    <th scope="col">Грузоподъемность</th>
+                    <th scope="col">Тип раствора</th>
+                    <th scope="col">ГС</th>
+                    <th scope="col">ННС</th>
+                    <th scope="col">Маркер</th>
+                </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                {% for pad in result.0 %}
+                <tr>
+                    <th scope="row">{{pad.0.0.number}}</th>
+                    <td>{{pad.0.0.field}}</td>
+                    <td>{{pad.0.0.first_stage_date|date:"d.m.Y"}}</td>
+                    <td>{{pad.0.0.second_stage_date|date:"d.m.Y"}}</td>
+                    <td>{{pad.0.0.required_capacity}}</td>
+                    <td>{{pad.0.0.required_mud}}</td>
+                    <td>{{pad.0.0.gs_quantity}}</td>
+                    <td>{{pad.0.0.nns_quantity}}</td>
+                    <td>{{pad.0.0.marker}}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-lg-12 mx-auto">
+            <p class="lead mt-3">Буровые установки</p>
+        </div>
+        <div class="row">
+            <table class="table">
+                <thead class="table-dark">
+                <tr>
+                    <th scope="col">Заводской номер</th>
+                    <th scope="col">Тип БУ</th>
+                    <th scope="col">Подрядчик</th>
+                    <th scope="col">Тип бурового раствора</th>
+                </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                {% for rig in result.1 %}
+                <tr>
+                    <th scope="row">{{rig.0.0.number}}</th>
+                    <td>{{rig.0.0.type}}</td>
+                    <td>{{rig.0.0.contractor}}</td>
+                    <td>{{rig.0.0.mud}}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+
+        <div class="col-lg-12 mx-auto">
+            <p class="lead mt-3">Расположение буровых установок</p>
+        </div>
+        <div class="row">
+            <table class="table">
+                <thead class="table-dark">
+                <tr>
+                    <th scope="col">Тип БУ</th>
+                    <th scope="col">зав.№</th>
+                    <th scope="col">Подрядчик</th>
+                    <th scope="col">Номер куста</th>
+                    <th scope="col">Месторождение</th>
+                    <th scope="col">Дата начала бурения</th>
+                    <th scope="col">Дата окончания бурения</th>
+                </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                {% for res in result %}
+                {% for rig_position in res %}
+                <tr>
+                    {% if rig_position.1 %}
+                    <td>{{rig_position.1.0.drilling_rig.type}}</td>
+                    <td>{{rig_position.1.0.drilling_rig.number}}</td>
+                    <td>{{rig_position.1.0.drilling_rig.contractor}}</td>
+                    <td>{{rig_position.1.0.pad.number}}</td>
+                    <td>{{rig_position.1.0.pad.field}}</td>
+                    <th scope="col">{{rig_position.1.0.start_date|date:"d.m.Y"}}</th>
+                    <th scope="col">{{rig_position.1.0.end_date|date:"d.m.Y"}}</th>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    {% endblock %}

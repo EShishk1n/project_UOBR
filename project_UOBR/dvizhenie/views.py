@@ -244,3 +244,40 @@ class SignUpView(generic.CreateView):
     form_class = UserCreationForm
     success_url = reverse_lazy("login")
     template_name = "registration/signup.html"
+
+
+class Search(ListView):
+    template_name = "dvizhenie/search.html"
+    context_object_name = "result"
+
+    def get_id(self) -> dict:
+        return {'pad': Pad.objects.filter(number__contains=self.request.GET.get('q')).values_list('id'),
+                'rig': DrillingRig.objects.filter(number__contains=self.request.GET.get('q')).values_list('id')}
+
+    def get_queryset(self) -> list:
+        pads_id = self.get_id()['pad']
+        rigs_id = self.get_id()['rig']
+        result = []
+        result_pads_id = []
+        result_rigs_id = []
+        for pad_id in pads_id:
+            pad = Pad.objects.filter(id=pad_id[0])
+            rig_position = RigPosition.objects.filter(pad=pad_id[0])
+            res_ = [pad, rig_position]
+            result_pads_id.append(res_)
+        result.append(result_pads_id)
+
+        for rig_id in rigs_id:
+            rig = DrillingRig.objects.filter(id=rig_id[0])
+            rig_position = RigPosition.objects.filter(drilling_rig=rig_id[0])
+            res_ = [rig, rig_position]
+            result_rigs_id.append(res_)
+        result.append(result_rigs_id)
+
+        return result
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['q'] = self.request.GET.get('q')
+
+        return context
