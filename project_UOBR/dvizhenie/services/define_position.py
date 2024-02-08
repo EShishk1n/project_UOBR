@@ -14,7 +14,6 @@ def define_position_and_put_into_BD() -> None:
     for rig_for_define_next_position in rigs_for_define_next_position:
         result: [dict] = _define_next_position(rig_for_define_next_position.current_position)
 
-        print(rig_for_define_next_position, result)
         NextPosition.objects.filter(current_position=rig_for_define_next_position.current_position).update(
             status=result['status'])
         NextPosition.objects.filter(current_position=rig_for_define_next_position.current_position).update(
