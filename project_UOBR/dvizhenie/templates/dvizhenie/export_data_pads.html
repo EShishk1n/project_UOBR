@@ -1,0 +1,35 @@
+{% extends 'dvizhenie/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container px-3 py-1">
+    <div class="row">
+        <h1 class="display-6 fw-bold mt-2 mb-5">Экспорт данных по кустовым площадкам из excel-таблицы "Движение_БУ"</h1>
+        {% if error_message %}
+        <p class="lead mb-4"><a class="link-danger"> {{ error_message }}</a></p>
+        <p class="lead mb-4">Необходимо <a class="link-secondary" href="{% url 'upload_file' %}">обновить
+            файл</a> "Движение_БУ"</p>
+
+        {% else %}
+        {% if file_creation_date %}
+        <p class="lead mb-4">На сервер загружен файл "Движение_БУ" <a class="link-primary">{{ file_creation_date }}</a>.
+        </p>
+        <p class="lead mb-4">Можете <a class="link-secondary" href="{% url 'upload_file' %}">обновить файл</a></p>
+        <form action="" method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-secondary">Подтвердить</button>
+                <a class="btn btn-outline-secondary" href="{% url 'pad' %}" role="button">Назад к списку</a>
+            </div>
+        </form>
+        {% else %}
+        <p class="lead mb-4">На сервер не загружен файл "Движение_БУ"</p>
+        <p class="lead mb-4">Для экспорта данных необходимо <a class="link-secondary" href="{% url 'upload_file' %}">загрузить
+            файл</a></p>
+        {% endif %}
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

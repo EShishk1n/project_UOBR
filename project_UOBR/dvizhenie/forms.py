@@ -41,3 +41,13 @@ class RigPositionForm(forms.ModelForm):
             'start_date': 'Начало бурения',
             'end_date': 'Окончание бурения',
         }
+
+
+class UploadFileForm(forms.Form):
+    file = forms.FileField(label='')
+
+
+class ExportDataForm(forms.Form):
+
+    table_start_row = forms.IntegerField(label='Первая строка экспортируемого интервала')
+    table_end_row = forms.IntegerField(label='Последняя строка экспортируемого интервала')

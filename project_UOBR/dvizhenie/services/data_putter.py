@@ -2,10 +2,10 @@ from dvizhenie.models import Pad, RigPosition
 from dvizhenie.services.data_taker import take_rigs_position_data, take_pads_data
 
 
-def put_rigs_position_data(table_start: str, table_end: str):
+def put_rigs_position_data(table_start_row: str, table_end_row: str):
     """Вставляет данные, полученные из таблицы в модель RigPosition"""
 
-    rigs_position_data = take_rigs_position_data(table_start=table_start, table_end=table_end)
+    rigs_position_data = take_rigs_position_data(table_start_row=table_start_row, table_end_row=table_end_row)
 
     for rig_position_data in rigs_position_data:
         drilling_pad = (Pad.objects.filter(number=rig_position_data['number']) &
@@ -13,15 +13,15 @@ def put_rigs_position_data(table_start: str, table_end: str):
         RigPosition.objects.filter(pad=drilling_pad[0].id).update(end_date=rig_position_data['end_date'])
 
 
-def put_pads_data(table_start: str, table_end: str):
+def put_pads_data(table_start_row: str, table_end_row: str):
     """Вставляет данные, полученные из таблицы в модель Pad"""
 
-    pads_data = take_pads_data(table_start=table_start, table_end=table_end)
+    pads_data = take_pads_data(table_start_row=table_start_row, table_end_row=table_end_row)
 
     for pad_data in pads_data:
         building_pad = (Pad.objects.filter(number=pad_data['number']) &
                         Pad.objects.filter(field=pad_data['field']))
-        if building_pad is not None:
+        if building_pad:
             Pad.objects.filter(id=building_pad[0].id).update(first_stage_date=pad_data['first_stage_date'])
             Pad.objects.filter(id=building_pad[0].id).update(second_stage_date=pad_data['second_stage_date'])
             Pad.objects.filter(id=building_pad[0].id).update(required_capacity=pad_data['required_capacity'])
@@ -39,4 +39,4 @@ def put_pads_data(table_start: str, table_end: str):
                 required_mud=pad_data['required_mud'],
                 gs_quantity=pad_data['gs_quantity'],
                 nns_quantity=pad_data['nns_quantity'],
-                marker=pad_data['marker'])
+                marker=pad_data['marker']).save()

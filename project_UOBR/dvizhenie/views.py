@@ -13,9 +13,12 @@ from django.db.utils import IntegrityError
 
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 
-from .forms import DrillingRigForm, PadForm, RigPositionForm
+from .forms import DrillingRigForm, PadForm, RigPositionForm, UploadFileForm, ExportDataForm
 from .models import DrillingRig, Pad, RigPosition, NextPosition, PositionRating
+from .services.data_putter import put_rigs_position_data, put_pads_data
+from .services.data_taker import take_file_cration_data
 from .services.define_position import define_position_and_put_into_BD
+from .services.func_for_view import handle_uploaded_file
 from .services.get_rating import _get_marker_for_drilling_rig, _get_inf_about_RNB_department
 
 
@@ -38,6 +41,7 @@ def contacts(request):
 
 
 class DrillingRigView(LoginRequiredMixin, ListView):
+
     template_name = 'dvizhenie/rig.html'
     context_object_name = 'rigs'
     model = DrillingRig
@@ -246,7 +250,7 @@ class SignUpView(generic.CreateView):
     template_name = "registration/signup.html"
 
 
-class Search(ListView):
+class Search(LoginRequiredMixin, ListView):
     template_name = "dvizhenie/search.html"
     context_object_name = "result"
 
@@ -281,3 +285,65 @@ class Search(ListView):
         context['q'] = self.request.GET.get('q')
 
         return context
+
+
+@permission_required(perm='dvizhenie.change_rigposition', raise_exception=True)
+def export_data_rig_positions(request):
+    """Обновляет даты окончания бурения по инф. из загруженного файла 'Движение_БУ'"""
+
+    file_creation_date = take_file_cration_data()
+    try:
+        if request.method == 'POST':
+            form = ExportDataForm(request.POST)
+            if form.is_valid():
+                put_rigs_position_data(table_start_row=form.cleaned_data['table_start_row'],
+                                       table_end_row=form.cleaned_data['table_end_row'])
+                return redirect('rig_position')
+        else:
+            form = ExportDataForm()
+
+        return render(request, "dvizhenie/export_data_rig_positions.html", {"form": form,
+                                                                            "file_creation_date": file_creation_date})
+    except IndexError:
+        return render(request, "dvizhenie/export_data_rig_positions.html",
+                      {"error_message": 'На данной кустовой площадке нет буровой установки'})
+    except ValueError:
+        return render(request, "dvizhenie/export_data_rig_positions.html",
+                      {"error_message": 'Несоответствие данных в файле "Движение_БУ"'})
+
+
+@permission_required(perm='dvizhenie.change_pad', raise_exception=True)
+def export_data_pads(request):
+    """Обновляет информацию по кустам по инф. из загруженного файла 'Движение_БУ'"""
+
+    file_creation_date = take_file_cration_data()
+    try:
+        if request.method == 'POST':
+            form = ExportDataForm(request.POST)
+            if form.is_valid():
+                put_pads_data(table_start_row=form.cleaned_data['table_start_row'],
+                              table_end_row=form.cleaned_data['table_end_row'])
+                return redirect('pad')
+        else:
+            form = ExportDataForm()
+
+        return render(request, "dvizhenie/export_data_pads.html", {"form": form,
+                                                                   "file_creation_date": file_creation_date})
+    except ValueError:
+        return render(request, "dvizhenie/export_data_pads.html",
+                      {"error_message": 'Несоответствие данных в файле "Движение_БУ"'})
+
+
+@permission_required(perm='dvizhenie.change_rigposition', raise_exception=True)
+def upload_file(request):
+    """Рендерит страницу с загрузкой, загружает файл"""
+
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            handle_uploaded_file(request.FILES["file"])
+            return redirect('export_data')
+    else:
+        form = UploadFileForm()
+
+    return render(request, "dvizhenie/upload_file.html", {"form": form})

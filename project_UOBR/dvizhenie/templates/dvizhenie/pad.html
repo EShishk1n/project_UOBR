@@ -11,6 +11,11 @@
             <p class="lead mt-3"><a href="{% url 'pad_add' %}" class="link-secondary">Добавить кустовую площадку </a>(запланированную
                 к отсыпке/отсыпанную)</p>
             {% endif %}
+            <p class="lead mt-3 mb-1">Скорректировать информацию по отсыпке КП:</p>
+            <ul>
+                <li>по ссылке в таблице</li>
+                <li><a class="link-primary" href="{% url 'export_data_pads' %}">экспортом из файла "Движение_БУ"</a></li>
+            </ul>
         </div>
 
 
