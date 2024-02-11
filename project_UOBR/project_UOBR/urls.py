@@ -23,7 +23,6 @@ from dvizhenie import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
-    path("signup/", views.SignUpView.as_view(), name="signup"),
     path('start', views.start_page, name='start_page'),
     path('search', views.Search.as_view(), name='search'),
     path('about_app', views.about_app, name='about_app'),
@@ -40,8 +39,8 @@ urlpatterns = [
     path('rig_position/<int:pk>', views.RigPositionUpdateView.as_view(), name='rig_position_update'),
     path('next_position', views.NextPositionView.as_view(), name='next_position'),
     path('define_next_position', views.define_next_position, name='define_next_position'),
-    path('next_position/<int:pk>', views.PositionRatingDetailView.as_view(), name='position_rating'),
-    path('next_position/all/<int:pk>', views.PositionRatingListView.as_view(), name='position_rating_all'),
+    path('next_position/<int:pk>', views.get_detail_info_for_next_position, name='position_rating'),
+    path('next_position/all/<int:pk>', views.get_rating_for_all_possible_next_positions, name='position_rating_all'),
     path('commit_next_position/<int:pk>', views.commit_next_position, name='commit_next_position'),
     path('upload_file', views.upload_file, name='upload_file'),
     path('export_data_pads', views.export_data_pads, name='export_data_pads'),

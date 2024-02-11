@@ -1,24 +1,15 @@
-from datetime import date
-
-import django
-from django.contrib.auth import logout
 from django.contrib.auth.decorators import permission_required
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.contrib.auth.views import LoginView
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views import View, generic
-from django.db.utils import IntegrityError
-
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 
 from .forms import DrillingRigForm, PadForm, RigPositionForm, UploadFileForm, ExportDataForm
 from .models import DrillingRig, Pad, RigPosition, NextPosition, PositionRating
 from .services.data_putter import put_rigs_position_data, put_pads_data
 from .services.data_taker import take_file_cration_data
 from .services.define_position import define_position_and_put_into_BD
-from .services.func_for_view import handle_uploaded_file
+from .services.func_for_view import handle_uploaded_file, _change_next_position, get_search_result
 from .services.get_rating import _get_marker_for_drilling_rig, _get_inf_about_RNB_department
 
 
@@ -41,6 +32,7 @@ def contacts(request):
 
 
 class DrillingRigView(LoginRequiredMixin, ListView):
+    """Отображает данные из модели DrillingRig"""
 
     template_name = 'dvizhenie/rig.html'
     context_object_name = 'rigs'
@@ -49,6 +41,8 @@ class DrillingRigView(LoginRequiredMixin, ListView):
 
 
 class DrillingRigAddView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    """Добавляет экземпляры в модель DrillingRig"""
+
     form_class = DrillingRigForm
     template_name = 'dvizhenie/add_update_rig.html'
     success_url = reverse_lazy('rig')
@@ -56,6 +50,8 @@ class DrillingRigAddView(LoginRequiredMixin, PermissionRequiredMixin, CreateView
 
 
 class DrillingRigUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    """Обновляет информацию в модели DrillingRig"""
+
     model = DrillingRig
     form_class = DrillingRigForm
     template_name = 'dvizhenie/add_update_rig.html'
@@ -65,6 +61,8 @@ class DrillingRigUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateV
 
 
 class DrillingRigDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    """Удаляет экземпляры из модели DrillingRig"""
+
     model = DrillingRig
     context_object_name = 'rig'
     pk_url_kwarg = 'pk'
@@ -74,12 +72,16 @@ class DrillingRigDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteV
 
 
 class PadView(LoginRequiredMixin, ListView):
+    """Отображает данные из модели Pad"""
+
     queryset = (Pad.objects.exclude(status='drilling_or_drilled_pad') & Pad.objects.exclude(number='Мобилизация'))
     template_name = 'dvizhenie/pad.html'
     context_object_name = 'pads'
 
 
 class PadAddView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    """Добавляет экземпляры в модель Pad"""
+
     form_class = PadForm
     template_name = 'dvizhenie/add_update_pad.html'
     success_url = reverse_lazy('pad')
@@ -87,6 +89,8 @@ class PadAddView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 
 
 class PadUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    """Обновляет информацию в модели Pad"""
+
     model = Pad
     form_class = PadForm
     template_name = 'dvizhenie/add_update_pad.html'
@@ -96,6 +100,8 @@ class PadUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
 
 class PadDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    """Удаляет экземпляры из модели Pad"""
+
     model = Pad
     pk_url_kwarg = 'pk'
     context_object_name = 'pad'
@@ -105,6 +111,8 @@ class PadDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
 
 class RigPositionView(LoginRequiredMixin, ListView):
+    """Отображает данные из модели RigPosition"""
+
     template_name = 'dvizhenie/rig_position.html'
     context_object_name = 'rig_positions'
     model = RigPosition
@@ -112,6 +120,8 @@ class RigPositionView(LoginRequiredMixin, ListView):
 
 
 class RigPositionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    """Обновляет информацию в модели RigPosition"""
+
     model = RigPosition
     form_class = RigPositionForm
     context_object_name = 'rig_position'
@@ -123,12 +133,16 @@ class RigPositionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateV
 
 @permission_required(perm='dvizhenie.change_nextposition', raise_exception=True)
 def define_next_position(request):
+    """Определяет следующую позицию для списка БУ"""
+
     if request.method == 'GET':
         define_position_and_put_into_BD()
     return redirect("next_position")
 
 
 class NextPositionView(LoginRequiredMixin, ListView):
+    """Отображает экземпляры из модели NextPosition по которым требуются действия специалиста"""
+
     template_name = 'dvizhenie/next_position.html'
     context_object_name = 'next_positions'
     queryset = (NextPosition.objects.filter(status='Требуется подтверждение') |
@@ -138,33 +152,33 @@ class NextPositionView(LoginRequiredMixin, ListView):
     ordering = "status"
 
 
-class PositionRatingDetailView(LoginRequiredMixin, View):
+def get_detail_info_for_next_position(request, pk):
+    """Получает подробную информацию об экземляре NextPosition (рейтинг, маркер, стратегию)"""
 
-    def get(self, request, pk):
-        next_position_object = NextPosition.objects.get(id=pk)
-        position_rating = (
-                PositionRating.objects.filter(current_position=next_position_object.current_position.id)
-                & PositionRating.objects.filter(next_position=next_position_object.next_position.id))
+    next_position_object = NextPosition.objects.get(id=pk)
+    position_rating = (
+            PositionRating.objects.filter(current_position=next_position_object.current_position.id)
+            & PositionRating.objects.filter(next_position=next_position_object.next_position.id))
 
-        marker = _get_marker_for_drilling_rig(
-            rig_for_define_next_position=position_rating[0].current_position)
+    marker = _get_marker_for_drilling_rig(
+        rig_for_define_next_position=position_rating[0].current_position)
 
-        strategy = _get_inf_about_RNB_department(
-            rig_for_define_next_position=position_rating[0].current_position)
+    strategy = _get_inf_about_RNB_department(
+        rig_for_define_next_position=position_rating[0].current_position)
 
-        return render(request, 'dvizhenie/position_rating.html',
-                      {"position_rating": position_rating[0], "marker": marker, "strategy": strategy})
+    return render(request, 'dvizhenie/position_rating.html',
+                  {"position_rating": position_rating[0], "marker": marker, "strategy": strategy})
 
 
-class PositionRatingListView(LoginRequiredMixin, View):
+def get_rating_for_all_possible_next_positions(request, pk):
+    """Получает все экземпляры модели PositionRating для БУ, для которой определяется следующая позиция"""
 
-    def get(self, request, pk):
-        next_position_object = NextPosition.objects.get(id=pk)
-        position_rating = PositionRating.objects.filter(
-            current_position=next_position_object.current_position.id).order_by('-common_rating')
+    next_position_object = NextPosition.objects.get(id=pk)
+    position_rating = PositionRating.objects.filter(
+        current_position=next_position_object.current_position.id).order_by('-common_rating')
 
-        return render(request, 'dvizhenie/position_rating_all.html',
-                      {"position_rating": position_rating})
+    return render(request, 'dvizhenie/position_rating_all.html',
+                  {"position_rating": position_rating})
 
 
 @permission_required(perm='dvizhenie.change_nextposition', raise_exception=True)
@@ -186,16 +200,7 @@ def change_next_position(request, pk):
 
     if request.method == 'GET':
         different_next_position = PositionRating.objects.filter(id=pk)[0]
-        try:
-            NextPosition.objects.filter(current_position=different_next_position.current_position).update(
-                next_position=different_next_position.next_position)
-        except IntegrityError:
-            NextPosition.objects.filter(next_position=different_next_position.next_position).update(next_position=None)
-            NextPosition.objects.filter(current_position=different_next_position.current_position).update(
-                next_position=different_next_position.next_position)
-        finally:
-            NextPosition.objects.filter(current_position=different_next_position.current_position).update(
-                status='Изменено. Требуется подтверждение')
+        _change_next_position(different_next_position=different_next_position)
 
     return redirect('next_position')
 
@@ -212,6 +217,8 @@ def delete_next_position(request, pk):
 
 
 class CommitedNextPositionView(LoginRequiredMixin, ListView):
+    """Отображает, подтвержденные специалистом, экземплры модели NextPosition"""
+
     template_name = 'dvizhenie/commited_next_position.html'
     context_object_name = 'next_positions'
     queryset = NextPosition.objects.filter(status='Подтверждено')
@@ -244,13 +251,9 @@ def commit_commited_position(request, pk):
     return redirect('commited_next_position')
 
 
-class SignUpView(generic.CreateView):
-    form_class = UserCreationForm
-    success_url = reverse_lazy("login")
-    template_name = "registration/signup.html"
-
-
 class Search(LoginRequiredMixin, ListView):
+    """Поиск по моделям приложения"""
+
     template_name = "dvizhenie/search.html"
     context_object_name = "result"
 
@@ -261,22 +264,8 @@ class Search(LoginRequiredMixin, ListView):
     def get_queryset(self) -> list:
         pads_id = self.get_id()['pad']
         rigs_id = self.get_id()['rig']
-        result = []
-        result_pads_id = []
-        result_rigs_id = []
-        for pad_id in pads_id:
-            pad = Pad.objects.filter(id=pad_id[0])
-            rig_position = RigPosition.objects.filter(pad=pad_id[0])
-            res_ = [pad, rig_position]
-            result_pads_id.append(res_)
-        result.append(result_pads_id)
 
-        for rig_id in rigs_id:
-            rig = DrillingRig.objects.filter(id=rig_id[0])
-            rig_position = RigPosition.objects.filter(drilling_rig=rig_id[0])
-            res_ = [rig, rig_position]
-            result_rigs_id.append(res_)
-        result.append(result_rigs_id)
+        result = get_search_result(pads_id, rigs_id)
 
         return result
 

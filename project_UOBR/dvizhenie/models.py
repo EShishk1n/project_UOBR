@@ -67,6 +67,7 @@ class Field(models.TextChoices):
 class DrillingRig(models.Model):
     """Буровые установки с основной информацией"""
 
+    objects = models.Manager()
     type = models.ForeignKey(type_of_DR, on_delete=models.CASCADE)
     number = models.CharField(unique=True)
     contractor = models.ForeignKey(Contractor, on_delete=models.CASCADE)
@@ -91,6 +92,8 @@ class DrillingRig(models.Model):
 
 class Pad(models.Model):
     """Кустовые площадки с основной информацией"""
+
+    objects = models.Manager()
 
     class Capacity(models.IntegerChoices):
         very_heavy = 400, '400'
@@ -129,6 +132,7 @@ class Pad(models.Model):
 class RigPosition(models.Model):
     """Текущее местоположение буровых установок"""
 
+    objects = models.Manager()
     drilling_rig = models.ForeignKey(DrillingRig, on_delete=models.CASCADE)
     pad = models.ForeignKey(Pad, on_delete=models.CASCADE)
     start_date = models.DateField(null=True, blank=True)
@@ -144,6 +148,7 @@ class RigPosition(models.Model):
 class NextPosition(models.Model):
     """Пары буровая-следущий куст"""
 
+    objects = models.Manager()
     current_position = models.OneToOneField(RigPosition, on_delete=models.CASCADE)
     next_position = models.OneToOneField(Pad, null=True, blank=True, on_delete=models.CASCADE)
     status = models.CharField(default='')
@@ -155,6 +160,7 @@ class NextPosition(models.Model):
 class PositionRating(models.Model):
     """Пары буровая-следующий куст с рейтингами"""
 
+    objects = models.Manager()
     current_position = models.ForeignKey(RigPosition, on_delete=models.CASCADE)
     current_position_end_date = models.DateField()
     next_position = models.ForeignKey(Pad, on_delete=models.CASCADE)
