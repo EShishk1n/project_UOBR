@@ -5,7 +5,8 @@
     <div class="row">
         <h1 class="display-6 fw-bold mt-2">Определение движения буровых установок</h1>
         <div class="col-lg-12 mx-auto">
-            <p class="lead mb-2">Представлены предлагаемые пары для<a style="background: #f5f5f5"> буровой установки</a></p>
+            <p class="lead mb-2">Представлены предлагаемые пары для<a style="background: #f5f5f5"> буровой установки</a>
+            </p>
             <p class="lead mb-4"><a href="{% url 'next_position' %}" class="link-secondary">Назад к расчету</a></p>
         </div>
 
@@ -35,11 +36,13 @@
                 {% for position_rating_ in position_rating %}
                 <tr>
                     <td style="background-color: #f5f5f5">{{position_rating_.current_position.drilling_rig.type}}</td>
-                    <td style="background-color: #f5f5f5">{{position_rating_.current_position.drilling_rig.capacity}}</td>
+                    <td style="background-color: #f5f5f5">{{position_rating_.current_position.drilling_rig.capacity}}
+                    </td>
                     <td style="background-color: #f5f5f5">{{position_rating_.current_position.drilling_rig.contractor}}
                     </td>
                     <td style="background-color: #f5f5f5">{{position_rating_.current_position.drilling_rig.mud}}</td>
-                    <td style="background-color: #f5f5f5">{{position_rating_.current_position.end_date|date:"d.m.Y"}}</td>
+                    <td style="background-color: #f5f5f5">{{position_rating_.current_position.end_date|date:"d.m.Y"}}
+                    </td>
                     <th scope="row" style="background-color: #f5f5f5">{{position_rating_.current_position.pad.number}}
                         {{position_rating_.current_position.pad.field}}
                     </th>
@@ -61,11 +64,20 @@
                     <td style="background-color: #f0fff0">{{position_rating_.next_position.marker}}</td>
                     <td>{{position_rating_.common_rating}}</td>
                     <td>
-                        {% if perms.dvizhenie.change_nextposition %}
-                        <div class="button-group">
-                            <a href="{% url 'change_next_position' position_rating_.id %}" class="link-secondary">Выбрать</a>
+                        <div class="button-group nav-item dropdown">
+                            <a class="link-secondary dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-list"></i>
+                            </a>
+                            <ul class="dropdown-menu" style="font-size:13px">
+                                {% if perms.dvizhenie.change_nextposition %}
+                                <li class="top-menu"><a class="dropdown-item link-secondary"
+                                                        href="{% url 'change_next_position' position_rating_.id %}">Выбрать</a>
+                                    {% endif %}
+                                <li class="top-menu"><a class="dropdown-item link-secondary"
+                                                        href="{% url 'position_rating_' position_rating_.id %}">Рейтинг</a>
+                                </li>
+                            </ul>
                         </div>
-                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}

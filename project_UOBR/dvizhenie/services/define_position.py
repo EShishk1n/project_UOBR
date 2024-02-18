@@ -1,15 +1,23 @@
+from datetime import datetime
+
 from dvizhenie.models import PositionRating, NextPosition, RigPosition, Pad
-from .get_rating import _get_rigs_for_define_next_position, get_ratings_and_put_into_BD
+from .define_rigs_for_definition_next_position import _get_rigs_for_calculation_rating, \
+    define_sequence_of_rigs_for_definition_positions, form_next_position
+from .get_rating import _get_rating_and_put_into_BD
 
 
-def define_position_and_put_into_BD() -> None:
+def define_position_and_put_into_BD(start_date_for_calculation: datetime.date,
+                                    end_date_for_calculation: datetime.date) -> None:
     """Определяет следующую позицию для БУ по максимальному рейтингу и отправляет данные в БД"""
 
     PositionRating.objects.all().delete()
 
-    get_ratings_and_put_into_BD()
+    _calculate_all_ratings_and_put_into_BD(start_date_for_calculation,
+                                           end_date_for_calculation)
 
-    rigs_for_define_next_position: [list] = _define_sequence_of_rigs_for_definition_positions()
+    form_next_position()
+
+    rigs_for_define_next_position: [list] = define_sequence_of_rigs_for_definition_positions()
 
     for rig_for_define_next_position in rigs_for_define_next_position:
         result: [dict] = _define_next_position(rig_for_define_next_position.current_position)
@@ -19,62 +27,30 @@ def define_position_and_put_into_BD() -> None:
         NextPosition.objects.filter(current_position=rig_for_define_next_position.current_position).update(
             next_position=result['next_position'])
 
-    _define_sequence_of_rigs_for_view()
+    # _define_sequence_of_rigs_for_view()
 
 
-def _put_rigs_for_define_in_NextPosition() -> None:
-    """Вставляет в модель NextPosition,
-    после проверки на наличие в модели,
-    буровые установки для определения движения"""
+def _calculate_all_ratings_and_put_into_BD(start_date_for_calculation: datetime.date,
+                                           end_date_for_calculation: datetime.date) -> None:
+    """Получает рейтинг для каждой пары буровая установка-куст"""
 
-    rigs_for_define_next_position = _get_rigs_for_define_next_position()
-    rigs_for_define_next_position_already_in_model = NextPosition.objects.all().values_list("current_position")
-    for rig_for_define_next_position in rigs_for_define_next_position:
-        if (rig_for_define_next_position.id,) not in rigs_for_define_next_position_already_in_model:
-            NextPosition(current_position=rig_for_define_next_position).save()
+    free_pads = (Pad.objects.exclude(status='drilling') &
+                 Pad.objects.exclude(status='drilled') &
+                 Pad.objects.exclude(status='commited_next_positions'))
 
-
-def _define_sequence_of_rigs_for_definition_positions() -> list:
-    """Определет порядок буровых установок для определения следующей позиции"""
-
-    _put_rigs_for_define_in_NextPosition()
-
-    rigs_for_define_next_position = (NextPosition.objects.exclude(status='Подтверждено') &
-                                     NextPosition.objects.exclude(status='Изменено. Требуется подтверждение'))
-
-    light_rigs = []
-    less_than_middle_rigs = []
-    middle_rigs = []
-    less_than_heavy_rigs = []
-    SNPH_rigs = []
-    other_rigs = []
+    rigs_for_define_next_position = _get_rigs_for_calculation_rating(start_date_for_calculation,
+                                                                     end_date_for_calculation)
 
     for rig_for_define_next_position in rigs_for_define_next_position:
-        capacity = int(rig_for_define_next_position.current_position.drilling_rig.capacity())
-        contractor = str(rig_for_define_next_position.current_position.drilling_rig.contractor)
-
-        if capacity == 200:
-            light_rigs.append(rig_for_define_next_position)
-        elif capacity == 225:
-            less_than_middle_rigs.append(rig_for_define_next_position)
-        elif capacity == 250:
-            middle_rigs.append(rig_for_define_next_position)
-        elif capacity == 270:
-            less_than_heavy_rigs.append(rig_for_define_next_position)
-        else:
-            if contractor == 'СНПХ':
-                SNPH_rigs.append(rig_for_define_next_position)
-            else:
-                other_rigs.append(rig_for_define_next_position)
-
-    return light_rigs + less_than_middle_rigs + middle_rigs + less_than_heavy_rigs + SNPH_rigs + other_rigs
+        for free_pad in free_pads:
+            _get_rating_and_put_into_BD(rig_for_define_next_position, free_pad)
 
 
 def _define_next_position(rig_for_define_next_position: RigPosition) -> dict:
     """Определяет следующую позицию для одной буровой установки. Присваивает статус паре"""
 
-    positions = PositionRating.objects.filter(current_position=rig_for_define_next_position).order_by(
-        '-common_rating') & PositionRating.objects.filter(status='')
+    positions = PositionRating.objects.filter(current_position=rig_for_define_next_position, status='').order_by(
+        '-common_rating')
 
     if not positions:
         next_position = None
@@ -85,28 +61,26 @@ def _define_next_position(rig_for_define_next_position: RigPosition) -> dict:
         status = 'Требуется подтверждение'
         PositionRating.objects.filter(next_position=next_position).update(status='booked')
 
-        if {'next_position': next_position.id} in NextPosition.objects.filter(
-                status='Изменено. Требуется подтверждение').values('next_position'):
+        if next_position.id in NextPosition.objects.all().values('next_position'):
             _define_next_position(rig_for_define_next_position)
 
     return {'next_position': next_position, 'status': status}
 
-
-def _define_sequence_of_rigs_for_view() -> None:
-    """Определет порядок буровых установок для предоставления"""
-
-    rigs_for_view = NextPosition.objects.all()
-
-    rigs_for_view_dict = {}
-
-    for rig_for_view in rigs_for_view:
-        rigs_for_view_dict[rig_for_view] = rig_for_view.current_position.end_date
-
-    sorted_rigs_for_view = sorted(rigs_for_view_dict.items(), key=lambda item: item[1])
-
-    NextPosition.objects.all().delete()
-
-    for rig_for_view in sorted_rigs_for_view:
-        NextPosition(current_position=rig_for_view[0].current_position,
-                     next_position=rig_for_view[0].next_position,
-                     status=rig_for_view[0].status).save()
+# def _define_sequence_of_rigs_for_view() -> None:
+#     """Определет порядок буровых установок для предоставления"""
+#
+#     rigs_for_view = NextPosition.objects.all()
+#
+#     rigs_for_view_dict = {}
+#
+#     for rig_for_view in rigs_for_view:
+#         rigs_for_view_dict[rig_for_view] = rig_for_view.current_position.end_date
+#
+#     sorted_rigs_for_view = sorted(rigs_for_view_dict.items(), key=lambda item: item[1])
+#
+#     NextPosition.objects.all().delete()
+#
+#     for rig_for_view in sorted_rigs_for_view:
+#         NextPosition(current_position=rig_for_view[0].current_position,
+#                      next_position=rig_for_view[0].next_position,
+#                      status=rig_for_view[0].status).save()

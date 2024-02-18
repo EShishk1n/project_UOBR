@@ -1,14 +1,20 @@
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.db import IntegrityError
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views.generic.edit import FormMixin
+from django.utils.translation import gettext as _
 
-from .forms import DrillingRigForm, PadForm, RigPositionForm, UploadFileForm, ExportDataForm
+from .forms import DrillingRigForm, PadForm, RigPositionForm, UploadFileForm, ExportDataForm, DefinePositionForm, \
+    RigPositionAddForm
 from .models import DrillingRig, Pad, RigPosition, NextPosition, PositionRating
 from .services.data_putter import put_rigs_position_data, put_pads_data
 from .services.data_taker import take_file_cration_data
 from .services.define_position import define_position_and_put_into_BD
+from .services.define_rigs_for_definition_next_position import _get_status_to_pads
 from .services.func_for_view import handle_uploaded_file, _change_next_position, get_search_result
 from .services.get_rating import _get_marker_for_drilling_rig, _get_inf_about_RNB_department
 
@@ -74,7 +80,7 @@ class DrillingRigDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteV
 class PadView(LoginRequiredMixin, ListView):
     """Отображает данные из модели Pad"""
 
-    queryset = (Pad.objects.exclude(status='drilling_or_drilled_pad') & Pad.objects.exclude(number='Мобилизация'))
+    queryset = (Pad.objects.exclude(status='drilling') & Pad.objects.exclude(status='drilled'))
     template_name = 'dvizhenie/pad.html'
     context_object_name = 'pads'
 
@@ -115,8 +121,43 @@ class RigPositionView(LoginRequiredMixin, ListView):
 
     template_name = 'dvizhenie/rig_position.html'
     context_object_name = 'rig_positions'
-    model = RigPosition
-    fields = '__all__'
+    queryset = RigPosition.objects.filter(pad__status='drilling')
+
+    def get(self, request, *args, **kwargs):
+
+        _get_status_to_pads()
+
+        self.object_list = self.get_queryset()
+        allow_empty = self.get_allow_empty()
+
+        if not allow_empty:
+            # When pagination is enabled and object_list is a queryset,
+            # it's better to do a cheap query than to load the unpaginated
+            # queryset in memory.
+            if self.get_paginate_by(self.object_list) is not None and hasattr(
+                self.object_list, "exists"
+            ):
+                is_empty = not self.object_list.exists()
+            else:
+                is_empty = not self.object_list
+            if is_empty:
+                raise Http404(
+                    _("Empty list and “%(class_name)s.allow_empty” is False.")
+                    % {
+                        "class_name": self.__class__.__name__,
+                    }
+                )
+        context = self.get_context_data()
+        return self.render_to_response(context)
+
+
+class RigPositionAddView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    """Добавляет экземпляры в модель RigPosition"""
+
+    form_class = RigPositionAddForm
+    template_name = 'dvizhenie/add_rig_position.html'
+    success_url = reverse_lazy('rig_position')
+    permission_required = 'dvizhenie.add_rigposition'
 
 
 class RigPositionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
@@ -131,16 +172,18 @@ class RigPositionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateV
     permission_required = 'dvizhenie.change_rigposition'
 
 
-@permission_required(perm='dvizhenie.change_nextposition', raise_exception=True)
-def define_next_position(request):
-    """Определяет следующую позицию для списка БУ"""
+class RigPositionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    """Удаляет экземпляры из модели RigPosition"""
 
-    if request.method == 'GET':
-        define_position_and_put_into_BD()
-    return redirect("next_position")
+    model = RigPosition
+    pk_url_kwarg = 'pk'
+    context_object_name = 'rig_position'
+    success_url = reverse_lazy('rig_position')
+    template_name = 'dvizhenie/delete_rig_position.html'
+    permission_required = 'dvizhenie.delete_rigposition'
 
 
-class NextPositionView(LoginRequiredMixin, ListView):
+class NextPositionView(LoginRequiredMixin, PermissionRequiredMixin, ListView, FormMixin):
     """Отображает экземпляры из модели NextPosition по которым требуются действия специалиста"""
 
     template_name = 'dvizhenie/next_position.html'
@@ -149,7 +192,19 @@ class NextPositionView(LoginRequiredMixin, ListView):
                 NextPosition.objects.filter(status='Изменено. Требуется подтверждение') |
                 NextPosition.objects.filter(status='Отсутствют кандидаты') |
                 NextPosition.objects.filter(status='Удалено пользователем'))
-    ordering = "status"
+    ordering = "current_position__end_date"
+    permission_required = 'dvizhenie.change_rigposition'
+
+    form_class = DefinePositionForm
+
+    def post(self, request):
+        form = DefinePositionForm(request.POST)
+        if form.is_valid():
+            define_position_and_put_into_BD(start_date_for_calculation=form.cleaned_data['start_date_for_calculation'],
+                                            end_date_for_calculation=form.cleaned_data['end_date_for_calculation'])
+            return redirect('next_position')
+        else:
+            return redirect('next_position')
 
 
 def get_detail_info_for_next_position(request, pk):
@@ -159,6 +214,21 @@ def get_detail_info_for_next_position(request, pk):
     position_rating = (
             PositionRating.objects.filter(current_position=next_position_object.current_position.id)
             & PositionRating.objects.filter(next_position=next_position_object.next_position.id))
+
+    marker = _get_marker_for_drilling_rig(
+        rig_for_define_next_position=position_rating[0].current_position)
+
+    strategy = _get_inf_about_RNB_department(
+        rig_for_define_next_position=position_rating[0].current_position)
+
+    return render(request, 'dvizhenie/position_rating.html',
+                  {"position_rating": position_rating[0], "marker": marker, "strategy": strategy})
+
+
+def get_detail_info_for_position_rating(request, pk):
+    """Получает подробную информацию об экземляре PositionRating (рейтинг, маркер, стратегию)"""
+
+    position_rating = PositionRating.objects.filter(id=pk)
 
     marker = _get_marker_for_drilling_rig(
         rig_for_define_next_position=position_rating[0].current_position)
@@ -190,7 +260,7 @@ def commit_next_position(request, pk):
         pad_id = NextPosition.objects.filter(id=pk)[0].next_position.id
         Pad.objects.filter(id=pad_id).update(status='commited_next_positions')
 
-    return redirect('define_next_position')
+    return redirect('next_position')
 
 
 @permission_required(perm='dvizhenie.change_nextposition', raise_exception=True)
@@ -294,8 +364,15 @@ def export_data_rig_positions(request):
         return render(request, "dvizhenie/export_data_rig_positions.html", {"form": form,
                                                                             "file_creation_date": file_creation_date})
     except IndexError:
+
         return render(request, "dvizhenie/export_data_rig_positions.html",
                       {"error_message": 'На данной кустовой площадке нет буровой установки'})
+    except AttributeError:
+        return render(request, "dvizhenie/export_data_rig_positions.html",
+                      {"error_message": 'Пустая ячейка с датой в файле "Движение_БУ"'})
+    except IntegrityError:
+        return render(request, "dvizhenie/export_data_rig_positions.html",
+                      {"error_message": 'Некорректный тип данных'})
     except ValueError:
         return render(request, "dvizhenie/export_data_rig_positions.html",
                       {"error_message": 'Несоответствие данных в файле "Движение_БУ"'})
@@ -318,6 +395,12 @@ def export_data_pads(request):
 
         return render(request, "dvizhenie/export_data_pads.html", {"form": form,
                                                                    "file_creation_date": file_creation_date})
+    except AttributeError:
+        return render(request, "dvizhenie/export_data_pads.html",
+                      {"error_message": 'Пустая ячейка с датой в файле "Движение_БУ"'})
+    except IntegrityError:
+        return render(request, "dvizhenie/export_data_pads.html",
+                      {"error_message": 'Некорректный тип данных'})
     except ValueError:
         return render(request, "dvizhenie/export_data_pads.html",
                       {"error_message": 'Несоответствие данных в файле "Движение_БУ"'})
@@ -331,7 +414,7 @@ def upload_file(request):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             handle_uploaded_file(request.FILES["file"])
-            return redirect('export_data')
+            return redirect(request.META.get('HTTP_REFERER'))
     else:
         form = UploadFileForm()
 

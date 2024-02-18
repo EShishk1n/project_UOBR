@@ -19,7 +19,10 @@ class DrillingRigForm(forms.ModelForm):
 class PadForm(forms.ModelForm):
     class Meta:
         model = Pad
-        fields = '__all__'
+        fields = (
+            'number', 'field', 'first_stage_date', 'second_stage_date', 'required_capacity', 'required_mud',
+            'gs_quantity',
+            'nns_quantity', 'marker')
         labels = {
             'number': 'Кустовая площадка №',
             'field': 'Месторождение',
@@ -30,6 +33,18 @@ class PadForm(forms.ModelForm):
             'gs_quantity': 'Количество горизонтальных скважин',
             'nns_quantity': 'Количество наклонно-направленных скважин',
             'marker': 'Маркер',
+        }
+
+
+class RigPositionAddForm(forms.ModelForm):
+    class Meta:
+        model = RigPosition
+        fields = (
+            'drilling_rig', 'pad', 'end_date')
+        labels = {
+            'drilling_rig': 'БУ с мобилизации',
+            'pad': 'откуда',
+            'end_date': 'Готовность к транспортировке на КП',
         }
 
 
@@ -48,6 +63,10 @@ class UploadFileForm(forms.Form):
 
 
 class ExportDataForm(forms.Form):
-
     table_start_row = forms.IntegerField(label='Первая строка экспортируемого интервала')
     table_end_row = forms.IntegerField(label='Последняя строка экспортируемого интервала')
+
+
+class DefinePositionForm(forms.Form):
+    start_date_for_calculation = forms.DateField(label='начало периода для расчета')
+    end_date_for_calculation = forms.DateField(label='окончание периода для расчета')

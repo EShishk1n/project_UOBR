@@ -1,38 +1,11 @@
-from django.db.models import QuerySet
 from dvizhenie.models import RigPosition, Pad, PositionRating
 
-from datetime import date, timedelta
+from datetime import timedelta
 from .dop_inf import for_m_e_rating
-
-
-def get_ratings_and_put_into_BD() -> None:
-    """Получает рейтинг для каждой пары буровая установка-куст"""
-
-    _get_status_to_pads()
-
-    free_pads = (Pad.objects.exclude(status='drilling_or_drilled_pad') &
-                 Pad.objects.exclude(status='commited_next_positions'))
-
-    rigs_for_define_next_position = _get_rigs_for_define_next_position()
-
-    for rig_for_define_next_position in rigs_for_define_next_position:
-        for free_pad in free_pads:
-            _get_rating_and_put_into_BD(rig_for_define_next_position, free_pad)
-
-
-def _get_rigs_for_define_next_position() -> QuerySet:
-    """Получает список буровых установок, которые выйдут из бурения в течении следующих 3 месяцев, для определения
-    последующего движения"""
-
-    month_for_defenition = date.today().month
-    return RigPosition.objects.filter(
-        end_date__month__range=(month_for_defenition, int(month_for_defenition) + 3)).order_by('end_date')
 
 
 def _get_rating_and_put_into_BD(rig_for_define_next_position: RigPosition, free_pad: Pad) -> None:
     """Получает рейтинг для пары кустов и отправляет его в БД"""
-
-    current_position_end_date = rig_for_define_next_position.end_date
 
     capacity_rating = _get_capacity_rating(rig_for_define_next_position, free_pad)
     first_stage_date_rating = _get_first_stage_date_rating(rig_for_define_next_position, free_pad)
@@ -52,7 +25,7 @@ def _get_rating_and_put_into_BD(rig_for_define_next_position: RigPosition, free_
                 + logistic_rating * 3 + marker_rating * 0.1 + strategy_rating * 1.2)
 
         ratings = PositionRating(current_position=rig_for_define_next_position,
-                                 current_position_end_date=current_position_end_date, next_position=free_pad,
+                                 next_position=free_pad,
                                  capacity_rating=capacity_rating, first_stage_date_rating=first_stage_date_rating,
                                  second_stage_date_rating=second_stage_date_rating, mud_rating=mud_rating,
                                  logistic_rating=logistic_rating, marker_rating=marker_rating,
@@ -207,8 +180,22 @@ def _get_marker_rating(rig_for_define_next_position: RigPosition, free_pad: Pad)
     marker_for_drilling_rig = _get_marker_for_drilling_rig(rig_for_define_next_position)
     marker_for_pad = str(free_pad.marker)
 
-    if marker_for_drilling_rig == 'ZJ-50 2эш':
+    if marker_for_drilling_rig == 'стандартная БУ':
         if marker_for_pad == 'для 2эш':
+            marker_rating = 0
+        elif marker_for_pad == 'СНПХ':
+            marker_rating = 4
+        else:
+            marker_rating = 10
+
+    elif marker_for_drilling_rig == 'СНПХ':
+        if marker_for_pad == 'СНПХ':
+            marker_rating = 10
+        else:
+            marker_rating = 0
+
+    elif marker_for_pad == 'для 2эш':
+        if marker_for_drilling_rig == 'ZJ-50 2эш':
             marker_rating = 10
         else:
             marker_rating = 0
@@ -219,17 +206,11 @@ def _get_marker_rating(rig_for_define_next_position: RigPosition, free_pad: Pad)
         else:
             marker_rating = 0
 
-    elif marker_for_drilling_rig == "СНПХ":
-        if marker_for_pad == 'СНПХ':
-            marker_rating = 10
-        else:
-            marker_rating = 0
-
     elif marker_for_pad == 'приоритет':
         marker_rating = 10
 
     else:
-        marker_rating = 10
+        marker_rating = 0
 
     return marker_rating
 
@@ -331,11 +312,3 @@ def _get_inf_about_RNB_department(rig_for_define_next_position: RigPosition) -> 
         RNB_department = 'нет стратегии'
 
     return RNB_department
-
-
-def _get_status_to_pads():
-    """Присваивает статус 'в бурении/пробурен' кустам"""
-
-    drilling_or_drilled_pads = RigPosition.objects.all().values_list('pad')
-    for drilling_or_drilled_pad in drilling_or_drilled_pads:
-        Pad.objects.filter(id=drilling_or_drilled_pad[0]).update(status='drilling_or_drilled_pad')

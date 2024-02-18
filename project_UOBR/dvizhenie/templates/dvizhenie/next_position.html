@@ -1,4 +1,5 @@
 {% extends 'dvizhenie/base.html' %}
+{% load crispy_forms_tags %}
 
 {% block content %}
 <div class="container px-3 py-1">
@@ -10,8 +11,13 @@
             <p class="lead mb-4"> Расчет произведен на основании рейтинговой системы, учитывающей готовность,
                 грузоподъемность, логистику, технологию, стратегию.</p>
             {% if perms.dvizhenie.change_nextposition %}
-            <p class="lead mb-4"><a href="{% url 'define_next_position' %}" class="link-primary"><i
-                    class="fa-solid fa-rotate-right"></i> Обновить расчет</a></p>
+            <form method="post" class="mb-4">
+                {% csrf_token %}
+                {{ form }}
+                <div class=" gap-2">
+                    <button type="submit" class="btn btn-secondary">Обновить</button>
+                </div>
+            </form>
             {% endif %}
         </div>
 

@@ -78,7 +78,7 @@ class DrillingRig(models.Model):
         if is_DR_russian in ['/', '-']:
             return int(str(self.type)[5:])
         else:
-            if str(self.type) in ['ZJ-50 2эш', 'ZJ-50 0.5эш', 'Bentec']:
+            if str(self.type) in ['ZJ-50 2эш', 'ZJ-50 0.5эш', 'Bentec', 'ZJ-50 1эш']:
                 return 320
             elif str(self.type) == 'Drillmec':
                 return 225
@@ -104,7 +104,7 @@ class Pad(models.Model):
         light = 200, '200'
         new = 0, '0'
 
-    number = models.CharField(unique=True)
+    number = models.CharField()
     field = models.CharField(choices=Field.choices, null=False, blank=True)
     first_stage_date = models.DateField(null=False, blank=True)
     second_stage_date = models.DateField(null=False, blank=True)
@@ -162,7 +162,6 @@ class PositionRating(models.Model):
 
     objects = models.Manager()
     current_position = models.ForeignKey(RigPosition, on_delete=models.CASCADE)
-    current_position_end_date = models.DateField()
     next_position = models.ForeignKey(Pad, on_delete=models.CASCADE)
     capacity_rating = models.FloatField()
     first_stage_date_rating = models.FloatField()
@@ -175,8 +174,7 @@ class PositionRating(models.Model):
     status = models.CharField(default='')
 
     class Meta:
-        ordering = ["common_rating", "current_position", "current_position_end_date"]
+        ordering = ["current_position"]
 
     def __str__(self):
         return str(f'{self.current_position} {self.next_position} {self.common_rating}')
-
