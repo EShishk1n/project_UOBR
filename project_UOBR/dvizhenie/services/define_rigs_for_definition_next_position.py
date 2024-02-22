@@ -91,3 +91,7 @@ def _get_status_to_pads() -> None:
         if rig_position_for_one_DR.count() > 1:
             for rig_position_ in list(rig_position_for_one_DR)[:-1]:
                 Pad.objects.filter(id=rig_position_.pad.id).update(status='drilled')
+
+    for pad in Pad.objects.all():
+        if (pad.id,) in list(NextPosition.objects.filter(status='Подтверждено').values_list('next_position')):
+            Pad.objects.filter(id=pad.id).update(status='commited_next_positions')

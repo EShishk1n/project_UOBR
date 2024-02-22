@@ -6,6 +6,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 class type_of_DR(models.Model):
     """Типовые буровые установки"""
 
+    objects = models.Manager()
     type = models.CharField(unique=True)
 
     def __str__(self):
@@ -15,6 +16,7 @@ class type_of_DR(models.Model):
 class Contractor(models.Model):
     """Типовые наименования подрядных организаций по бурению"""
 
+    objects = models.Manager()
     contractor = models.CharField()
 
     def __str__(self):

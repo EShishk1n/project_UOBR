@@ -193,7 +193,7 @@ class NextPositionView(LoginRequiredMixin, PermissionRequiredMixin, ListView, Fo
                 NextPosition.objects.filter(status='Отсутствют кандидаты') |
                 NextPosition.objects.filter(status='Удалено пользователем'))
     ordering = "current_position__end_date"
-    permission_required = 'dvizhenie.change_rigposition'
+    permission_required = 'dvizhenie.view_nextposition'
 
     form_class = DefinePositionForm
 
@@ -258,6 +258,7 @@ def commit_next_position(request, pk):
     if request.method == 'GET':
         NextPosition.objects.filter(id=pk).update(status='Подтверждено')
         pad_id = NextPosition.objects.filter(id=pk)[0].next_position.id
+
         Pad.objects.filter(id=pad_id).update(status='commited_next_positions')
 
     return redirect('next_position')
