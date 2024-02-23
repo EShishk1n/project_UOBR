@@ -1,4 +1,4 @@
-from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db import IntegrityError
 from django.http import HttpResponseRedirect, Http404
@@ -135,7 +135,7 @@ class RigPositionView(LoginRequiredMixin, ListView):
             # it's better to do a cheap query than to load the unpaginated
             # queryset in memory.
             if self.get_paginate_by(self.object_list) is not None and hasattr(
-                self.object_list, "exists"
+                    self.object_list, "exists"
             ):
                 is_empty = not self.object_list.exists()
             else:
@@ -207,50 +207,57 @@ class NextPositionView(LoginRequiredMixin, PermissionRequiredMixin, ListView, Fo
             return redirect('next_position')
 
 
+@login_required(login_url='accounts/')
 def get_detail_info_for_next_position(request, pk):
     """Получает подробную информацию об экземляре NextPosition (рейтинг, маркер, стратегию)"""
 
-    next_position_object = NextPosition.objects.get(id=pk)
-    position_rating = (
-            PositionRating.objects.filter(current_position=next_position_object.current_position.id)
-            & PositionRating.objects.filter(next_position=next_position_object.next_position.id))
+    if request.method == 'GET':
+        next_position_object = NextPosition.objects.get(id=pk)
+        position_rating = (
+                PositionRating.objects.filter(current_position=next_position_object.current_position.id)
+                & PositionRating.objects.filter(next_position=next_position_object.next_position.id))
 
-    marker = _get_marker_for_drilling_rig(
-        rig_for_define_next_position=position_rating[0].current_position)
+        marker = _get_marker_for_drilling_rig(
+            rig_for_define_next_position=position_rating[0].current_position)
 
-    strategy = _get_inf_about_RNB_department(
-        rig_for_define_next_position=position_rating[0].current_position)
+        strategy = _get_inf_about_RNB_department(
+            rig_for_define_next_position=position_rating[0].current_position)
 
-    return render(request, 'dvizhenie/position_rating.html',
-                  {"position_rating": position_rating[0], "marker": marker, "strategy": strategy})
+        return render(request, 'dvizhenie/position_rating.html',
+                      {"position_rating": position_rating[0], "marker": marker, "strategy": strategy})
 
 
+@login_required(login_url='accounts/')
 def get_detail_info_for_position_rating(request, pk):
     """Получает подробную информацию об экземляре PositionRating (рейтинг, маркер, стратегию)"""
 
-    position_rating = PositionRating.objects.filter(id=pk)
+    if request.method == 'GET':
+        position_rating = PositionRating.objects.filter(id=pk)
 
-    marker = _get_marker_for_drilling_rig(
-        rig_for_define_next_position=position_rating[0].current_position)
+        marker = _get_marker_for_drilling_rig(
+            rig_for_define_next_position=position_rating[0].current_position)
 
-    strategy = _get_inf_about_RNB_department(
-        rig_for_define_next_position=position_rating[0].current_position)
+        strategy = _get_inf_about_RNB_department(
+            rig_for_define_next_position=position_rating[0].current_position)
 
-    return render(request, 'dvizhenie/position_rating.html',
-                  {"position_rating": position_rating[0], "marker": marker, "strategy": strategy})
+        return render(request, 'dvizhenie/position_rating.html',
+                      {"position_rating": position_rating[0], "marker": marker, "strategy": strategy})
 
 
+@login_required(login_url='accounts/')
 def get_rating_for_all_possible_next_positions(request, pk):
     """Получает все экземпляры модели PositionRating для БУ, для которой определяется следующая позиция"""
 
-    next_position_object = NextPosition.objects.get(id=pk)
-    position_rating = PositionRating.objects.filter(
-        current_position=next_position_object.current_position.id).order_by('-common_rating')
+    if request.method == 'GET':
+        next_position_object = NextPosition.objects.get(id=pk)
+        position_rating = PositionRating.objects.filter(
+            current_position=next_position_object.current_position.id).order_by('-common_rating')
 
-    return render(request, 'dvizhenie/position_rating_all.html',
-                  {"position_rating": position_rating})
+        return render(request, 'dvizhenie/position_rating_all.html',
+                      {"position_rating": position_rating})
 
 
+@login_required(login_url='accounts/')
 @permission_required(perm='dvizhenie.change_nextposition', raise_exception=True)
 def commit_next_position(request, pk):
     """Подтверждает (меняет статус пары в NextPosition на 'подтверждено') следующую позицию для БУ"""
@@ -264,6 +271,7 @@ def commit_next_position(request, pk):
     return redirect('next_position')
 
 
+@login_required(login_url='accounts/')
 @permission_required(perm='dvizhenie.change_nextposition', raise_exception=True)
 def change_next_position(request, pk):
     """Берет из рейтинга другую позицию для БУ и вставляет в NextPosition со статусом
@@ -276,6 +284,7 @@ def change_next_position(request, pk):
     return redirect('next_position')
 
 
+@login_required(login_url='accounts/')
 @permission_required(perm='dvizhenie.change_nextposition', raise_exception=True)
 def delete_next_position(request, pk):
     """Удаляет текущее предложение NextPosition"""
@@ -295,18 +304,21 @@ class CommitedNextPositionView(LoginRequiredMixin, ListView):
     queryset = NextPosition.objects.filter(status='Подтверждено')
 
 
+@login_required(login_url='accounts/')
 @permission_required(perm='dvizhenie.change_nextposition', raise_exception=True)
 def delete_commited_position(request, pk):
     """Меняет статус подтвержденной пары на 'Требуется подтверждение'"""
 
     if request.method == 'GET':
         next_position = NextPosition.objects.filter(id=pk)
-        next_position.update(status='Требуется подтверждение')
         Pad.objects.filter(id=next_position[0].next_position.id).update(status='')
-        next_position.delete()
+        next_position.update(next_position=None)
+        next_position.update(status='Удалено пользователем')
+
     return redirect('commited_next_position')
 
 
+@login_required(login_url='accounts/')
 @permission_required(perm='dvizhenie.change_nextposition', raise_exception=True)
 def commit_commited_position(request, pk):
     """Переносит пару из подтвержденных позиций (актуальное движение) в расположение БУ"""
@@ -335,7 +347,6 @@ class Search(LoginRequiredMixin, ListView):
     def get_queryset(self) -> list:
         pads_id = self.get_id()['pad']
         rigs_id = self.get_id()['rig']
-
         result = get_search_result(pads_id, rigs_id)
 
         return result
