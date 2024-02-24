@@ -62,12 +62,11 @@ def _get_capacity_rating(rig_for_define_next_position: RigPosition, free_pad: Pa
           rig_capacity == 250 and required_capacity == 200):
         capacity_rating = 1
 
-    elif (
-            rig_capacity == 320 and required_capacity == 400 or
-            rig_capacity == 270 and required_capacity == 320 or
-            rig_capacity == 250 and required_capacity == 270 or
-            rig_capacity == 225 and required_capacity == 250 or
-            rig_capacity == 200 and required_capacity == 225):
+    elif (rig_capacity == 320 and required_capacity == 400 or
+          rig_capacity == 270 and required_capacity == 320 or
+          rig_capacity == 250 and required_capacity == 270 or
+          rig_capacity == 225 and required_capacity == 250 or
+          rig_capacity == 200 and required_capacity == 225):
         capacity_rating = 0.5
 
     else:
@@ -91,14 +90,10 @@ def _get_first_stage_date_rating(rig_for_define_next_position: RigPosition, free
 
     # Первый этап будет готов через 12 дней после выхода БУ (8 баллов)
     elif end_date + timedelta(12) >= first_stage_date:
-        first_stage_date_rating = 8
+        first_stage_date_rating = 6
 
     # Первый этап будет готов через 18 дней после выхода БУ (3 баллов)
     elif end_date + timedelta(18) >= first_stage_date:
-        first_stage_date_rating = 3
-
-    # Первый этап будет готов через 20 дней после выхода БУ (1 балл, требуется ускорение)
-    elif end_date + timedelta(20) >= first_stage_date:
         first_stage_date_rating = 1
 
     else:
@@ -153,7 +148,7 @@ def _get_mud_rating(rig_for_define_next_position: RigPosition, free_pad: Pad) ->
             mud_rating = 5
 
     elif mud == 'РУО' and required_mud == 'РВО':
-        mud_rating = 9
+        mud_rating = 4
 
     else:
         mud_rating = 0
@@ -247,7 +242,7 @@ def _get_strategy_rating(rig_for_define_next_position: RigPosition, free_pad: Pa
             strategy_rating = 1
 
     elif RNB_department == 'НФ РНБ 2ой УБР':
-        # НФ РНБто второй УБР на Правдинском регионе
+        # НФ РНБ второй УБР на Правдинском регионе
         if next_field in ('ПРЗ', 'САЛ'):
             strategy_rating = 10
         else:

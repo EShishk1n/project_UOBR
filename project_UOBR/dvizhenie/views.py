@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db import IntegrityError
-from django.http import HttpResponseRedirect, Http404
+from django.http import Http404
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
@@ -358,6 +358,7 @@ class Search(LoginRequiredMixin, ListView):
         return context
 
 
+@login_required(login_url='accounts/')
 @permission_required(perm='dvizhenie.change_rigposition', raise_exception=True)
 def export_data_rig_positions(request):
     """Обновляет даты окончания бурения по инф. из загруженного файла 'Движение_БУ'"""

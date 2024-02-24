@@ -1,5 +1,3 @@
-from django.db import models
-
 from dvizhenie.models import Pad, NextPosition, PositionRating, RigPosition, DrillingRig
 from django.db.utils import IntegrityError
 

@@ -13,7 +13,7 @@ def open_work_sheet():
     return wb['Движение_БУ']
 
 
-def take_rigs_position_data(table_start_row: str, table_end_row: str) -> list:
+def take_rigs_position_data(table_start_row: int, table_end_row: int) -> list:
     """Имортирует данные по окончанию бурения для каждой БУ из файла 'Движение_БУ'"""
 
     sheet = open_work_sheet()
@@ -34,7 +34,7 @@ def take_rigs_position_data(table_start_row: str, table_end_row: str) -> list:
     return rigs_position_data
 
 
-def take_pads_data(table_start_row: str, table_end_row: str) -> list:
+def take_pads_data(table_start_row: int, table_end_row: int) -> list:
     """Имортирует данные по КП из файла 'Движение_БУ'"""
 
     sheet = open_work_sheet()
@@ -75,4 +75,3 @@ def take_file_cration_data() -> str | None:
             '%d-%m-%Y, %H:%M')
     except FileNotFoundError:
         return None
-
