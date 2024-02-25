@@ -10,7 +10,7 @@
 
 
         <div class="row">
-            <table class="table" style="font-size: 13px;">
+            <table class="table">
                 <thead class="table-dark">
                 <tr>
                     <th scope="col">Тип БУ</th>
@@ -60,9 +60,17 @@
                     <td style="background-color: #f0fff0">{{next_position_.next_position.marker}}</td>
                     <td>
                         {% if perms.dvizhenie.change_nextposition %}
-                        <div class="button-group">
-                            <a href="{% url 'delete_commited_position' next_position_.id %}" class="link-secondary">Пересмотреть</a>
-                            <a href="{% url 'commit_commited_position' next_position_.id %}" class="link-secondary">Подтвердить движение</a>
+                         <div class="button-group nav-item dropdown">
+                            <a class="link-secondary dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-list"></i>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li class="top-menu"><a class="dropdown-item link-secondary"
+                                                        href="{% url 'delete_commited_position' next_position_.id %}">Пересмотреть</a>
+                                </li>
+                                <li class="top-menu"><a class="dropdown-item link-secondary"
+                                                        href="{% url 'commit_commited_position' next_position_.id %}">Подтвердить движение</a></li>
+                            </ul>
                         </div>
                         {% endif %}
                     </td>

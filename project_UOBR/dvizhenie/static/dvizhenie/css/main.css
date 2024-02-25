@@ -1,10 +1,10 @@
 html {
-    font-size: 16px;
+    font-size: calc(8px + 0.3vw);
 }
 
 body {
     font-family: "Oswald", sans-serif;
-    font-size: 16px;
+    font-size: calc(8px + 0.3vw);
     font-weight: 400;
     color: #000;
     background-color: #fff;
@@ -46,7 +46,7 @@ blockquote {
 .navbar-light .navbar-nav .nav-link {
     color: #555;
     font-weight: 400;
-    font-size: 16px;
+    font-size: calc(10px + 0.3vw);
 }
 
 .navbar-nav .dropdown-menu {
@@ -67,7 +67,7 @@ blockquote {
 .dropdown-menu {
     color: #555;
     font-weight: 400;
-    font-size: 16px;
+    font-size: calc(8px + 0.3vw);
 }
 
 .top-menu a:hover::after {
@@ -75,7 +75,7 @@ blockquote {
 }
 
 .navbar-nav .form-control {
-    font-size: 16px;
+    font-size: calc(8px + 0.3vw);
     padding-right: 0.75px;
 }
 
@@ -86,12 +86,11 @@ blockquote {
 }
 
 .navbar-nav .btn {
-    font-size: 16px;
+    font-size: calc(8px + 0.3vw);
     padding-right: 5px;
     padding-left: 5px;
     color: #555;
     font-weight: 400;
-    font-size: 16px;
     border: 0.5px solid;
 }
 
@@ -117,7 +116,7 @@ blockquote {
     text-decoration: none;
     color: #ccc;
     text-transform: uppercase;
-    font-size: 18px;
+    font-size: calc(10px + 0.3vw);
     border-bottom: 1px solid #666;
     padding-bottom: 3px;
     display:  block;
@@ -174,7 +173,7 @@ blockquote {
 }
 
 .product-links {
-    font-size: 20px;
+    font-size: calc(11px + 0.3vw);
     text-decoration: none;
     margin-left: 20px;
 }

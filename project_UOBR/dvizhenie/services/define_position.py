@@ -27,19 +27,16 @@ def define_position_and_put_into_BD(start_date_for_calculation: datetime.date,
         NextPosition.objects.filter(current_position=rig_for_define_next_position.current_position).update(
             next_position=result['next_position'])
 
-    # _define_sequence_of_rigs_for_view()
-
 
 def _calculate_all_ratings_and_put_into_BD(start_date_for_calculation: datetime.date,
                                            end_date_for_calculation: datetime.date) -> None:
     """Получает рейтинг для каждой пары буровая установка-куст"""
 
+    rigs_for_define_next_position = _get_rigs_for_calculation_rating(start_date_for_calculation,
+                                                                     end_date_for_calculation)
     free_pads = (Pad.objects.exclude(status='drilling') &
                  Pad.objects.exclude(status='drilled') &
                  Pad.objects.exclude(status='commited_next_positions'))
-
-    rigs_for_define_next_position = _get_rigs_for_calculation_rating(start_date_for_calculation,
-                                                                     end_date_for_calculation)
 
     for rig_for_define_next_position in rigs_for_define_next_position:
         for free_pad in free_pads:
@@ -65,22 +62,3 @@ def _define_next_position(rig_for_define_next_position: RigPosition) -> dict:
             _define_next_position(rig_for_define_next_position)
 
     return {'next_position': next_position, 'status': status}
-
-# def _define_sequence_of_rigs_for_view() -> None:
-#     """Определет порядок буровых установок для предоставления"""
-#
-#     rigs_for_view = NextPosition.objects.all()
-#
-#     rigs_for_view_dict = {}
-#
-#     for rig_for_view in rigs_for_view:
-#         rigs_for_view_dict[rig_for_view] = rig_for_view.current_position.end_date
-#
-#     sorted_rigs_for_view = sorted(rigs_for_view_dict.items(), key=lambda item: item[1])
-#
-#     NextPosition.objects.all().delete()
-#
-#     for rig_for_view in sorted_rigs_for_view:
-#         NextPosition(current_position=rig_for_view[0].current_position,
-#                      next_position=rig_for_view[0].next_position,
-#                      status=rig_for_view[0].status).save()

@@ -23,14 +23,11 @@
 
 <div class="page">
     <header class="header">
-        <nav class="navbar navbar-expand-lg navbar-light">
+        <nav class="navbar navbar-expand-md navbar-light">
             <div class="container-fluid">
-                <span class="navbar-brand mb-0 h1">Движение БУ</span>
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <a href="{% url 'start_page' %}" class="navbar-brand mb-0 h1">Движение БУ</a>
+                <div class="collapse navbar-collapse" id="navbarContent">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item top-menu">
-                            <a class="nav-link" href="{% url 'start_page' %}">Домой</a>
-                        </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                                data-bs-toggle="dropdown" aria-expanded="false">
@@ -114,7 +111,7 @@
                     <a href="{% url 'contacts' %}">Контакты</a>
                 </div>
                 <div class="col-sm-3">
-                    <a href="https://t.me/I7flowers"><i class="fa-brands fa-telegram"></i>   8-922-515-73-63 </a>
+                    <a href="https://t.me/I7flowers"><i class="fa-brands fa-telegram"></i> 8-922-515-73-63 </a>
                 </div>
             </div>
         </div>
