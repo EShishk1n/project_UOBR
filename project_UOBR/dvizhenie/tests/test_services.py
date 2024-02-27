@@ -33,7 +33,7 @@ class DataTakerTestCase(TestCase):
     def test_take_file_cration_data(self):
         # Дату для сравнения нужно поставить вручную
         result = take_file_cration_data()
-        self.assertEquals(result, '24-02-2024, 13:58')
+        self.assertEquals(result, '27-02-2024, 06:06')
 
 
 class DataPutterTestCase(TestCase):
@@ -286,7 +286,6 @@ class DefineRigsForDefinitionNextpositionTestCase(TestCase):
         self.assertEquals(NextPosition.objects.all().count(), 2)
 
     def test_form_next_position(self):
-
         _calculate_all_ratings_and_put_into_BD(start_date_for_calculation=date(2024, 9, 1),
                                                end_date_for_calculation=date(2024, 11, 1))
         form_next_position()
@@ -296,7 +295,8 @@ class DefineRigsForDefinitionNextpositionTestCase(TestCase):
     def test_define_sequence_of_rigs_for_definition_positions(self):
         self.type_of_DR_3 = type_of_DR.objects.create(type='2900/200')
         self.contractor3 = Contractor.objects.create(contractor='НФ РНБ')
-        self.drilling_rig_3 = DrillingRig.objects.create(type=self.type_of_DR_3, number=888, contractor=self.contractor3,
+        self.drilling_rig_3 = DrillingRig.objects.create(type=self.type_of_DR_3, number=888,
+                                                         contractor=self.contractor3,
                                                          mud='РВО')
         self.pad_13 = Pad.objects.create(number='2142у', field='ПРОл',
                                          first_stage_date=date(2024, 2, 20),
@@ -314,7 +314,8 @@ class DefineRigsForDefinitionNextpositionTestCase(TestCase):
 
         self.type_of_DR_4 = type_of_DR.objects.create(type='4500/270')
         self.contractor4 = Contractor.objects.create(contractor='ХМФ РНБ')
-        self.drilling_rig_4 = DrillingRig.objects.create(type=self.type_of_DR_4, number=999, contractor=self.contractor2,
+        self.drilling_rig_4 = DrillingRig.objects.create(type=self.type_of_DR_4, number=999,
+                                                         contractor=self.contractor2,
                                                          mud='РВО')
         self.pad_14 = Pad.objects.create(number='176', field='УБ',
                                          first_stage_date=date(2024, 2, 20),
@@ -386,14 +387,12 @@ class DefinePositionTestCase(TestCase):
                                                          start_date=date(2023, 2, 10), end_date=date(2024, 9, 20))
 
     def test__calculate_all_ratings_and_put_into_BD(self):
-
         _calculate_all_ratings_and_put_into_BD(start_date_for_calculation=date(2024, 9, 1),
                                                end_date_for_calculation=date(2024, 11, 1))
 
         self.assertEquals(PositionRating.objects.all().count(), 3)
 
     def test__define_next_position(self):
-
         _calculate_all_ratings_and_put_into_BD(start_date_for_calculation=date(2024, 9, 1),
                                                end_date_for_calculation=date(2024, 11, 1))
 
@@ -404,7 +403,6 @@ class DefinePositionTestCase(TestCase):
         self.assertEquals(result['status'], 'Требуется подтверждение')
 
     def test_define_position_and_put_into_BD(self):
-
         self.assertEquals(NextPosition.objects.all().count(), 1)
 
         define_position_and_put_into_BD(start_date_for_calculation=date(2024, 9, 1),

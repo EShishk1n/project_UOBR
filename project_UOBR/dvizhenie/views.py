@@ -1,6 +1,8 @@
+import logging
+
 from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.http import Http404
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
@@ -19,8 +21,12 @@ from .services.func_for_view import handle_uploaded_file, _change_next_position,
 from .services.get_rating import _get_marker_for_drilling_rig, _get_inf_about_RNB_department
 
 
+logger = logging.getLogger(__name__)
+
+
 def start_page(request):
     """Рендерит стартовую страницу"""
+    logger.warning('hello')
 
     return render(request, 'dvizhenie/start_page.html')
 
@@ -131,9 +137,6 @@ class RigPositionView(LoginRequiredMixin, ListView):
         allow_empty = self.get_allow_empty()
 
         if not allow_empty:
-            # When pagination is enabled and object_list is a queryset,
-            # it's better to do a cheap query than to load the unpaginated
-            # queryset in memory.
             if self.get_paginate_by(self.object_list) is not None and hasattr(
                     self.object_list, "exists"
             ):
@@ -197,11 +200,13 @@ class NextPositionView(LoginRequiredMixin, PermissionRequiredMixin, ListView, Fo
 
     form_class = DefinePositionForm
 
+    @transaction.atomic
     def post(self, request):
-        form = DefinePositionForm(request.POST)
+        form = self.form_class(request.POST)
         if form.is_valid():
             define_position_and_put_into_BD(start_date_for_calculation=form.cleaned_data['start_date_for_calculation'],
                                             end_date_for_calculation=form.cleaned_data['end_date_for_calculation'])
+            logger.warning('Произведен расчет движения')
             return redirect('next_position')
         else:
             return redirect('next_position')
@@ -259,6 +264,7 @@ def get_rating_for_all_possible_next_positions(request, pk):
 
 @login_required(login_url='accounts/')
 @permission_required(perm='dvizhenie.change_nextposition', raise_exception=True)
+@transaction.atomic
 def commit_next_position(request, pk):
     """Подтверждает (меняет статус пары в NextPosition на 'подтверждено') следующую позицию для БУ"""
 
@@ -273,6 +279,7 @@ def commit_next_position(request, pk):
 
 @login_required(login_url='accounts/')
 @permission_required(perm='dvizhenie.change_nextposition', raise_exception=True)
+@transaction.atomic
 def change_next_position(request, pk):
     """Берет из рейтинга другую позицию для БУ и вставляет в NextPosition со статусом
     'Изменено. Требуется подтверждение'"""
@@ -286,6 +293,7 @@ def change_next_position(request, pk):
 
 @login_required(login_url='accounts/')
 @permission_required(perm='dvizhenie.change_nextposition', raise_exception=True)
+@transaction.atomic
 def delete_next_position(request, pk):
     """Удаляет текущее предложение NextPosition"""
 
@@ -306,6 +314,7 @@ class CommitedNextPositionView(LoginRequiredMixin, ListView):
 
 @login_required(login_url='accounts/')
 @permission_required(perm='dvizhenie.change_nextposition', raise_exception=True)
+@transaction.atomic
 def delete_commited_position(request, pk):
     """Меняет статус подтвержденной пары на 'Требуется подтверждение'"""
 
@@ -320,6 +329,7 @@ def delete_commited_position(request, pk):
 
 @login_required(login_url='accounts/')
 @permission_required(perm='dvizhenie.change_nextposition', raise_exception=True)
+@transaction.atomic
 def commit_commited_position(request, pk):
     """Переносит пару из подтвержденных позиций (актуальное движение) в расположение БУ"""
 
@@ -360,38 +370,37 @@ class Search(LoginRequiredMixin, ListView):
 
 @login_required(login_url='accounts/')
 @permission_required(perm='dvizhenie.change_rigposition', raise_exception=True)
+@transaction.atomic
 def export_data_rig_positions(request):
     """Обновляет даты окончания бурения по инф. из загруженного файла 'Движение_БУ'"""
 
     file_creation_date = take_file_cration_data()
+
     try:
         if request.method == 'POST':
             form = ExportDataForm(request.POST)
             if form.is_valid():
-                put_rigs_position_data(table_start_row=form.cleaned_data['table_start_row'],
-                                       table_end_row=form.cleaned_data['table_end_row'])
-                return redirect('rig_position')
+                result = put_rigs_position_data(table_start_row=form.cleaned_data['table_start_row'],
+                                                table_end_row=form.cleaned_data['table_end_row'])
+                if result is None:
+                    return redirect('rig_position')
+                else:
+                    return render(request, "dvizhenie/export_data_rig_positions.html",
+                                  dict(error_message=result['error_message'], error_rig_position=str(
+                                      result['rig_position']['number']) + str(result['rig_position']['field'])))
         else:
             form = ExportDataForm()
+            return render(request, "dvizhenie/export_data_rig_positions.html", {"form": form,
+                                                                                "file_creation_date": file_creation_date})
 
-        return render(request, "dvizhenie/export_data_rig_positions.html", {"form": form,
-                                                                            "file_creation_date": file_creation_date})
-    except IndexError:
-
-        return render(request, "dvizhenie/export_data_rig_positions.html",
-                      {"error_message": 'На данной кустовой площадке нет буровой установки'})
     except AttributeError:
         return render(request, "dvizhenie/export_data_rig_positions.html",
-                      {"error_message": 'Пустая ячейка с датой в файле "Движение_БУ"'})
-    except IntegrityError:
-        return render(request, "dvizhenie/export_data_rig_positions.html",
-                      {"error_message": 'Некорректный тип данных'})
-    except ValueError:
-        return render(request, "dvizhenie/export_data_rig_positions.html",
-                      {"error_message": 'Несоответствие данных в файле "Движение_БУ"'})
+                      {"error_message": 'Проверьте корректность заполнения таблицы в файле!!!'})
 
 
+@login_required(login_url='accounts/')
 @permission_required(perm='dvizhenie.change_pad', raise_exception=True)
+@transaction.atomic
 def export_data_pads(request):
     """Обновляет информацию по кустам по инф. из загруженного файла 'Движение_БУ'"""
 
@@ -410,15 +419,13 @@ def export_data_pads(request):
                                                                    "file_creation_date": file_creation_date})
     except AttributeError:
         return render(request, "dvizhenie/export_data_pads.html",
-                      {"error_message": 'Пустая ячейка с датой в файле "Движение_БУ"'})
+                      {"error_message": 'Проверьте корректность заполнения таблицы в файле!!!'})
     except IntegrityError:
         return render(request, "dvizhenie/export_data_pads.html",
-                      {"error_message": 'Некорректный тип данных'})
-    except ValueError:
-        return render(request, "dvizhenie/export_data_pads.html",
-                      {"error_message": 'Несоответствие данных в файле "Движение_БУ"'})
+                      {"error_message": 'Проверьте корректность заполнения таблицы в файле!!!'})
 
 
+@login_required(login_url='accounts/')
 @permission_required(perm='dvizhenie.change_rigposition', raise_exception=True)
 def upload_file(request):
     """Рендерит страницу с загрузкой, загружает файл"""
@@ -427,8 +434,9 @@ def upload_file(request):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             handle_uploaded_file(request.FILES["file"])
-            return redirect(request.META.get('HTTP_REFERER'))
+            return redirect(request.session['return_path'])
     else:
         form = UploadFileForm()
+        request.session['return_path'] = request.META.get('HTTP_REFERER', '/')
 
     return render(request, "dvizhenie/upload_file.html", {"form": form})

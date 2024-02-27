@@ -8,7 +8,8 @@
             <p class="lead mb-4">Представлен список кустовых площадок, на которых производятся/ранее произведены работы
                 по бурнию скважин</p>
             <p class="lead mt-3">Добавление информации в таблицу производится при определении движения</p>
-            <p class="lead mt-3"><a href="{% url 'rig_position_add' %}" class="link-secondary">Добавить БУ с мобилизации</a></p>
+            <p class="lead mt-3"><a href="{% url 'rig_position_add' %}" class="link-secondary">Добавить БУ с
+                мобилизации</a></p>
 
             <p class="lead mt-3 mb-1">Скорректировать даты окончания бурения:</p>
             <ul>
@@ -16,6 +17,8 @@
                 <li><a class="link-primary" href="{% url 'export_data_rig_positions' %}">экспортом из файла
                     "Движение_БУ"</a></li>
             </ul>
+            <p class="lead mb-4">Всего в работе (бурение, мобилизация, ВМР) {{ rig_positions.count }} буровых
+                установок</p>
         </div>
 
 

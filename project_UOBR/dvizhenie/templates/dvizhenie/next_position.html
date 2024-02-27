@@ -13,7 +13,25 @@
             {% if perms.dvizhenie.change_nextposition %}
             <form method="post" class="mb-4">
                 {% csrf_token %}
-                {{ form }}
+                <div id="div_id_start_date_for_calculation" class="mb-3"><label for="id_start_date_for_calculation"
+                                                                                class="form-label requiredField">
+                    начало периода для расчета<span class="asteriskField">*</span> </label> <input type="text"
+                                                                                                   name="start_date_for_calculation"
+                                                                                                   class="dateinput form-control"
+                                                                                                   style="width: 20%"
+                                                                                                   required
+                                                                                                   id="id_start_date_for_calculation">
+                </div>
+                <div id="div_id_end_date_for_calculation" class="mb-3"><label for="id_end_date_for_calculation"
+                                                                              class="form-label requiredField">
+                    окончание периода для расчета<span class="asteriskField">*</span> </label> <input type="text"
+                                                                                                      name="end_date_for_calculation"
+                                                                                                      class="dateinput form-control"
+                                                                                                      style="width: 20%"
+                                                                                                      required
+                                                                                                      id="id_end_date_for_calculation">
+                </div>
+
                 <div class=" gap-2">
                     <button type="submit" class="btn btn-secondary">Обновить</button>
                 </div>
