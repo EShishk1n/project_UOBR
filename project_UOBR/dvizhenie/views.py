@@ -20,13 +20,12 @@ from .services.define_rigs_for_definition_next_position import _get_status_to_pa
 from .services.func_for_view import handle_uploaded_file, _change_next_position, get_search_result
 from .services.get_rating import _get_marker_for_drilling_rig, _get_inf_about_RNB_department
 
-
 logger = logging.getLogger(__name__)
 
 
 def start_page(request):
     """Рендерит стартовую страницу"""
-    logger.warning('hello')
+    logger.warning('Сервер работает, все ОК')
 
     return render(request, 'dvizhenie/start_page.html')
 
@@ -385,6 +384,9 @@ def export_data_rig_positions(request):
                 if result is None:
                     return redirect('rig_position')
                 else:
+                    logger.warning(
+                        'Возникла ошибка при акутуализации данных по выходу БУ %s %s' % (
+                            result['rig_position']['number'], result['rig_position']['field']))
                     return render(request, "dvizhenie/export_data_rig_positions.html",
                                   dict(error_message=result['error_message'], error_rig_position=str(
                                       result['rig_position']['number']) + str(result['rig_position']['field'])))
@@ -409,18 +411,29 @@ def export_data_pads(request):
         if request.method == 'POST':
             form = ExportDataForm(request.POST)
             if form.is_valid():
-                put_pads_data(table_start_row=form.cleaned_data['table_start_row'],
-                              table_end_row=form.cleaned_data['table_end_row'])
-                return redirect('pad')
+                result = put_pads_data(table_start_row=form.cleaned_data['table_start_row'],
+                                       table_end_row=form.cleaned_data['table_end_row'])
+                if result is None:
+                    return redirect('pad')
+                else:
+                    logger.warning(
+                        'Возникла ошибка при поытке вставить месторожедение не из перечня %s %s' % (
+                            result['pad_data']['number'], result['pad_data']['field']))
+                    return render(request, "dvizhenie/export_data_pads.html",
+                                  dict(error_message=result['error_message'], error_pad_data=str(
+                                      result['pad_data']['number']) + str(result['pad_data']['field'])))
+
         else:
             form = ExportDataForm()
 
         return render(request, "dvizhenie/export_data_pads.html", {"form": form,
                                                                    "file_creation_date": file_creation_date})
     except AttributeError:
+        logger.warning('Возникла ошибка при акутуализации данных по выходу БУ')
         return render(request, "dvizhenie/export_data_pads.html",
                       {"error_message": 'Проверьте корректность заполнения таблицы в файле!!!'})
     except IntegrityError:
+        logger.warning('Возникла ошибка при акутуализации данных по выходу БУ')
         return render(request, "dvizhenie/export_data_pads.html",
                       {"error_message": 'Проверьте корректность заполнения таблицы в файле!!!'})
 

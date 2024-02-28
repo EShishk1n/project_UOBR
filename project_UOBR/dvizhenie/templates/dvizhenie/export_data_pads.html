@@ -6,10 +6,11 @@
     <div class="row">
         <h1 class="display-6 fw-bold mt-2 mb-5">Экспорт данных по кустовым площадкам из excel-таблицы "Движение_БУ"</h1>
         {% if error_message %}
-        <p class="lead mb-4"> {{ error_message }}</p>
+        <p class="lead mb-4"> {{ error_message }} <a class="link-danger">{{ error_pad_data }}</a>. Скорректируйте данные
+            в файле "Движение_БУ" и обновите файл на сервере.</p>
         <div class="d-grid gap-2">
             <a class="btn btn-secondary" href="{% url 'upload_file' %}" role="button">Обновить файл</a>
-            <a class="btn btn-outline-secondary" href="{% url 'export_data_rig_positions' %}" role="button">Назад к
+            <a class="btn btn-outline-secondary" href="{% url 'export_data_pads' %}" role="button">Назад к
                 форме</a>
         </div>
         {% else %}

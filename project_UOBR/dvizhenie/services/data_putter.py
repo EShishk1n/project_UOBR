@@ -37,7 +37,10 @@ def put_pads_data(table_start_row: int, table_end_row: int):
                                                              nns_quantity=pad_data['nns_quantity'],
                                                              marker=pad_data['marker'])
 
-        else:
+        elif pad_data['field'] in (
+                'ВС', 'ВТК', 'ВПР', 'ВСТР', 'ЕФР', 'ЗУГ', 'КИН', 'КУЗ', 'КУДР', 'МБ', 'МАМ', 'МАЙ', 'МОСК', 'ОМБ',
+                'ПЕТ', 'ПРД','ПРОп', 'ПРОл', 'ЭРГ', 'ПРЗ', 'САЛ', 'СОЛ', 'СОР', 'СБ', 'СУГ', 'УГ', 'УБ', 'ФН', 'ЮБ',
+                'ЮТЕПЛ', 'ЮС',):
             Pad(number=pad_data['number'],
                 field=pad_data['field'],
                 first_stage_date=pad_data['first_stage_date'],
@@ -47,3 +50,5 @@ def put_pads_data(table_start_row: int, table_end_row: int):
                 gs_quantity=pad_data['gs_quantity'],
                 nns_quantity=pad_data['nns_quantity'],
                 marker=pad_data['marker']).save()
+        else:
+            return {'pad_data': pad_data, 'error_message': 'Такого месторождения нет в перечне'}
