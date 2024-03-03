@@ -208,7 +208,7 @@ class NextPositionView(LoginRequiredMixin, PermissionRequiredMixin, ListView, Fo
             logger.warning('Произведен расчет движения')
             return redirect('next_position')
         else:
-            return redirect('next_position')
+            return render(request, 'dvizhenie/next_position_not_valid_data.html')
 
 
 @login_required(login_url='accounts/')
@@ -390,6 +390,9 @@ def export_data_rig_positions(request):
                     return render(request, "dvizhenie/export_data_rig_positions.html",
                                   dict(error_message=result['error_message'], error_rig_position=str(
                                       result['rig_position']['number']) + str(result['rig_position']['field'])))
+            else:
+                return render(request, 'dvizhenie/export_data_rig_positions.html',
+                              {'error_message': 'В форме введены некорректные данные! Введите целые числа больше 1.'})
         else:
             form = ExportDataForm()
             return render(request, "dvizhenie/export_data_rig_positions.html", {"form": form,
@@ -422,6 +425,9 @@ def export_data_pads(request):
                     return render(request, "dvizhenie/export_data_pads.html",
                                   dict(error_message=result['error_message'], error_pad_data=str(
                                       result['pad_data']['number']) + str(result['pad_data']['field'])))
+            else:
+                return render(request, 'dvizhenie/export_data_pads.html',
+                              {'error_message': 'В форме введены некорректные данные! Введите целые числа больше 1.'})
 
         else:
             form = ExportDataForm()
@@ -446,8 +452,13 @@ def upload_file(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-            handle_uploaded_file(request.FILES["file"])
-            return redirect(request.session['return_path'])
+            if str(request.FILES['file'])[-5:] == '.xlsx':
+                handle_uploaded_file(request.FILES["file"])
+                return redirect(request.session['return_path'])
+            else:
+                return render(request, "dvizhenie/upload_file.html",
+                              {"form": form, "error_message": 'Необходимо загрузить файл в формате ".xlsx"!'})
+
     else:
         form = UploadFileForm()
         request.session['return_path'] = request.META.get('HTTP_REFERER', '/')

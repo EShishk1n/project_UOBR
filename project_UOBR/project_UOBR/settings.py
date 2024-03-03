@@ -139,6 +139,8 @@ TIME_ZONE = 'Asia/Yekaterinburg'
 
 USE_I18N = True
 
+USE_L10N = True
+
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
@@ -159,3 +161,5 @@ LOGIN_REDIRECT_URL = '/start'
 LOGOUT_REDIRECT_URL = '/start'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# DATE_INPUT_FORMATS = "%d.%m.%Y"

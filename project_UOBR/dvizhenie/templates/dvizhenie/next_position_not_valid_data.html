@@ -1,0 +1,17 @@
+{% extends 'dvizhenie/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container px-3 py-1">
+    <div class="row">
+        <h1 class="display-6 fw-bold mt-2">Определение движения буровых установок</h1>
+        <div class="col-lg-12 mx-auto">
+            <p class="lead mb-2">В форме введены некорректные данные! Для расчета введите даты в формате "ДД.ММ.ГГГГ"</p>
+        </div>
+        <div class="d-grid gap-2">
+            <a class="btn btn-outline-secondary" href="{% url 'next_position' %}" role="button">Назад к форме</a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

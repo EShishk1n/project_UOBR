@@ -17,6 +17,14 @@ class DrillingRigForm(forms.ModelForm):
 
 
 class PadForm(forms.ModelForm):
+    first_stage_date = forms.DateField(
+        widget=forms.DateInput(format='%d.%m.%Y'),
+        input_formats=['%d.%m.%Y'])
+
+    second_stage_date = forms.DateField(
+        widget=forms.DateInput(format='%d.%m.%Y'),
+        input_formats=['%d.%m.%Y'])
+
     class Meta:
         model = Pad
         fields = (
@@ -37,6 +45,10 @@ class PadForm(forms.ModelForm):
 
 
 class RigPositionAddForm(forms.ModelForm):
+    end_date = forms.DateField(
+        widget=forms.DateInput(format='%d.%m.%Y'),
+        input_formats=['%d.%m.%Y'])
+
     class Meta:
         model = RigPosition
         fields = (
@@ -49,6 +61,13 @@ class RigPositionAddForm(forms.ModelForm):
 
 
 class RigPositionForm(forms.ModelForm):
+    start_date = forms.DateField(
+        widget=forms.DateInput(format='%d.%m.%Y'),
+        input_formats=['%d.%m.%Y'])
+    end_date = forms.DateField(
+        widget=forms.DateInput(format='%d.%m.%Y'),
+        input_formats=['%d.%m.%Y'])
+
     class Meta:
         model = RigPosition
         fields = ('start_date', 'end_date')
@@ -59,14 +78,19 @@ class RigPositionForm(forms.ModelForm):
 
 
 class UploadFileForm(forms.Form):
-    file = forms.FileField(label='')
+    file = forms.FileField(label='', )
 
 
 class ExportDataForm(forms.Form):
-    table_start_row = forms.IntegerField(label='Первая строка экспортируемого интервала')
-    table_end_row = forms.IntegerField(label='Последняя строка экспортируемого интервала')
+    table_start_row = forms.IntegerField(label='Первая строка экспортируемого интервала', min_value=1)
+    table_end_row = forms.IntegerField(label='Последняя строка экспортируемого интервала', min_value=1)
 
 
 class DefinePositionForm(forms.Form):
-    start_date_for_calculation = forms.DateField(label='начало периода для расчета')
-    end_date_for_calculation = forms.DateField(label='окончание периода для расчета')
+
+    start_date_for_calculation = forms.DateField(widget=forms.DateInput(format='%d.%m.%Y'),
+                                                 input_formats=['%d.%m.%Y'],
+                                                 label='начало периода для расчета')
+    end_date_for_calculation = forms.DateField(widget=forms.DateInput(format='%d.%m.%Y'),
+                                               input_formats=['%d.%m.%Y'],
+                                               label='окончание периода для расчета')

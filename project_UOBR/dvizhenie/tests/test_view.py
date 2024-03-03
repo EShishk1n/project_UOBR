@@ -199,8 +199,8 @@ class PadTestCase(TestCase):
 
         response_perm = self.client.post(url,
                                          {'number': '165', 'field': 'ВС',
-                                          'first_stage_date': '2024-03-10',
-                                          'second_stage_date': '2023-04-10',
+                                          'first_stage_date': '10.03.2024',
+                                          'second_stage_date': '10.04.2023',
                                           'required_capacity': 270, 'required_mud': 'РВО', 'gs_quantity': 4,
                                           'nns_quantity': 8, 'marker': 'нет'})
         self.assertEquals(response_perm.status_code, 302)
@@ -231,8 +231,8 @@ class PadTestCase(TestCase):
         self.assertEquals(Pad.objects.all().count(), 3)
 
         response_perm = self.client.post(url, {'number': '89', 'field': 'УБ',
-                                               'first_stage_date': '2024-03-10',
-                                               'second_stage_date': '2023-04-10',
+                                               'first_stage_date': '10.03.2024',
+                                               'second_stage_date': '10.04.2023',
                                                'required_capacity': 270, 'required_mud': 'РУО', 'gs_quantity': 4,
                                                'nns_quantity': 8, 'marker': 'нет'})
         self.assertEquals(response_perm.status_code, 302)
@@ -329,8 +329,8 @@ class RigPositionTestCase(TestCase):
         response_perm = self.client.post(url,
                                          {'drilling_rig': self.drilling_rig_1.id,
                                           'pad': self.pad_2.id,
-                                          'start_date': '2024-03-10',
-                                          'end_date': '2023-04-11'})
+                                          'start_date': '10.03.2024',
+                                          'end_date': '11.04.2023'})
         self.assertEquals(response_perm.status_code, 302)
         self.assertEquals(RigPosition.objects.all().count(), 3)
         self.assertEquals(RigPosition.objects.filter(drilling_rig=self.drilling_rig_1)[0].end_date, date(2023, 4, 11))
@@ -360,8 +360,8 @@ class RigPositionTestCase(TestCase):
 
         response_perm = self.client.post(url, {'drilling_rig': self.drilling_rig_1.id,
                                                'pad': self.pad_2.id,
-                                               'start_date': '2024-05-10',
-                                               'end_date': '2025-01-01'})
+                                               'start_date': '10.05.2024',
+                                               'end_date': '01.01.2025'})
         self.assertEquals(response_perm.status_code, 302)
         self.assertEquals(RigPosition.objects.filter(drilling_rig=self.drilling_rig_1.id)[0].start_date,
                           date(2024, 5, 10))
@@ -484,8 +484,8 @@ class NextPositionTestCase(TestCase):
 
         # Тест без permission
         response_noperm = self.client.post(url,
-                                           {'start_date_for_calculation': '2024-02-01',
-                                            'end_date_for_calculation': '2024-04-01'})
+                                         {'start_date_for_calculation': '01.02.2024',
+                                          'end_date_for_calculation': '01.04.2024'})
         self.assertEquals(response_noperm.status_code, 403)
 
         # Тест с permission
@@ -493,8 +493,8 @@ class NextPositionTestCase(TestCase):
         self.user.user_permissions.add(permission)
         self.assertEquals(NextPosition.objects.all().count(), 3)
         response_perm = self.client.post(url,
-                                         {'start_date_for_calculation': '2024-02-01',
-                                          'end_date_for_calculation': '2024-04-01'})
+                                         {'start_date_for_calculation': '01.02.2024',
+                                          'end_date_for_calculation': '01.04.2024'})
         self.assertEquals(response_perm.status_code, 302)
         self.assertEquals(NextPosition.objects.all().count(), 1)
         self.assertEquals(NextPosition.objects.all()[0].current_position, self.rig_position_1)

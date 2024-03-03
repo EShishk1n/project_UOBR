@@ -5,6 +5,9 @@
 <div class="container px-3 py-1">
     <div class="row">
         <h1 class="display-6 fw-bold mt-2 mb-5">Загрузка файла "Движение_БУ"</h1>
+        {% if error_message %}
+        <p class="lead mb-4"> {{ error_message }} </p>
+        {% endif %}
         <form action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form|crispy }}
