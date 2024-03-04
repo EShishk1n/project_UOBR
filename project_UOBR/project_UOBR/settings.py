@@ -28,7 +28,7 @@ LOGGING = {
         "file": {
             "level": "WARNING",
             "class": "logging.FileHandler",
-            "filename": "\web_applications\project_UOBR\project_UOBR\logs\log.log",
+            "filename": "log.log",
             "formatter": "verbose",
         },
     },
