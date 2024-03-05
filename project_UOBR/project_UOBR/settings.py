@@ -15,31 +15,31 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "{asctime} {module} {message} {args}",
-            "style": "{",
-        },
-    },
-    "handlers": {
-        "file": {
-            "level": "WARNING",
-            "class": "logging.FileHandler",
-            "filename": "log.log",
-            "formatter": "verbose",
-        },
-    },
-    "loggers": {
-        "dvizhenie": {
-            "handlers": ["file"],
-            "level": "WARNING",
-            "propagate": True,
-        },
-    },
-}
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "formatters": {
+#         "verbose": {
+#             "format": "{asctime} {module} {message} {args}",
+#             "style": "{",
+#         },
+#     },
+#     "handlers": {
+#         "file": {
+#             "level": "WARNING",
+#             "class": "logging.FileHandler",
+#             "filename": "log.log",
+#             "formatter": "verbose",
+#         },
+#     },
+#     "loggers": {
+#         "dvizhenie": {
+#             "handlers": ["file"],
+#             "level": "WARNING",
+#             "propagate": True,
+#         },
+#     },
+# }
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
