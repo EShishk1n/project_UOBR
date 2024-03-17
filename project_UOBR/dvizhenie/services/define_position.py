@@ -15,7 +15,7 @@ def define_position_and_put_into_BD(start_date_for_calculation: datetime.date,
     _calculate_all_ratings_and_put_into_BD(start_date_for_calculation,
                                            end_date_for_calculation)
 
-    form_next_position()
+    form_next_position(start_date_for_calculation, end_date_for_calculation)
 
     rigs_for_define_next_position: [list] = define_sequence_of_rigs_for_definition_positions()
 

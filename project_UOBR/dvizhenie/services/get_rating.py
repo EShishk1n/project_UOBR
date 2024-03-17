@@ -62,13 +62,6 @@ def _get_capacity_rating(rig_for_define_next_position: RigPosition, free_pad: Pa
           rig_capacity == 250 and required_capacity == 200):
         capacity_rating = 1
 
-    elif (rig_capacity == 320 and required_capacity == 400 or
-          rig_capacity == 270 and required_capacity == 320 or
-          rig_capacity == 250 and required_capacity == 270 or
-          rig_capacity == 225 and required_capacity == 250 or
-          rig_capacity == 200 and required_capacity == 225):
-        capacity_rating = 0.5
-
     else:
         capacity_rating = 0
 
@@ -86,15 +79,19 @@ def _get_first_stage_date_rating(rig_for_define_next_position: RigPosition, free
 
     # Первый этап будет готов через 7 дней после выхода БУ (9 баллов)
     elif end_date + timedelta(7) >= first_stage_date:
-        first_stage_date_rating = 9
+        first_stage_date_rating = 9 
 
-    # Первый этап будет готов через 12 дней после выхода БУ (8 баллов)
+    # Первый этап будет готов через 12 дней после выхода БУ (6 баллов)
     elif end_date + timedelta(12) >= first_stage_date:
         first_stage_date_rating = 6
 
-    # Первый этап будет готов через 18 дней после выхода БУ (3 баллов)
+    # Первый этап будет готов через 18 дней после выхода БУ (1 баллов)
     elif end_date + timedelta(18) >= first_stage_date:
         first_stage_date_rating = 1
+
+    # Первый этап будет готов через 25 дней после выхода БУ (0.5 баллов)
+    elif end_date + timedelta(25) >= first_stage_date:
+        first_stage_date_rating = 0.5
 
     else:
         first_stage_date_rating = 0
@@ -236,35 +233,35 @@ def _get_strategy_rating(rig_for_define_next_position: RigPosition, free_pad: Pa
 
     if RNB_department == 'НФ РНБ 1ый УБР':
         # НФ РНБ первый УБР на ПРО
-        if next_field in ('ПРОл', 'ПРОп'):
+        if next_field in ('ПРОл', 'ПРОп', 'ЭРГ'):
             strategy_rating = 10
         else:
             strategy_rating = 1
 
     elif RNB_department == 'НФ РНБ 2ой УБР':
         # НФ РНБ второй УБР на Правдинском регионе
-        if next_field in ('ПРЗ', 'САЛ'):
+        if next_field in ('ПРЗ', 'САЛ', 'ЭРГ'):
             strategy_rating = 10
         else:
             strategy_rating = 1
 
     elif RNB_department == 'НФ РНБ 3ий УБР':
         # НФ РНБ третий УБР на Юганском и Майском регионе
-        if next_field not in ('ПРОл', 'ПРОп', 'ПРЗ', 'САЛ'):
+        if next_field not in ('ПРОл', 'ПРОп', 'ЭРГ', 'ПРЗ', 'САЛ'):
             strategy_rating = 10
         else:
             strategy_rating = 1
 
-    elif RNB_department == 'ХМФ РНБ 1ий УБР':
+    elif RNB_department == 'ХМФ РНБ 1ый УБР':
         # ХМФ РНБ первый УБР на ПРО
-        if next_field in ['ПРОл', 'ПРОп']:
+        if next_field in ('ПРОл', 'ПРОп', 'ЭРГ'):
             strategy_rating = 10
         else:
             strategy_rating = 1
 
     elif RNB_department == 'ХМФ РНБ 4ый УБР':
         # ХМФ РНБ четвертный УБР на Юганском, Майском, Правдинском регионе
-        if next_field not in ['ПРОл', 'ПРОп']:
+        if next_field not in ('ПРОл', 'ПРОп', 'ЭРГ'):
             strategy_rating = 10
         else:
             strategy_rating = 1
@@ -283,11 +280,11 @@ def _get_inf_about_RNB_department(rig_for_define_next_position: RigPosition) -> 
 
     if rig_contractor == 'НФ РНБ':
         # Первый УБР
-        if current_field in ['ПРОл', 'ПРОп']:
+        if current_field in ('ПРОл', 'ПРОп'):
             RNB_department = 'НФ РНБ 1ый УБР'
 
         # Второй УБР
-        elif current_field in ['ПРЗ', 'САЛ']:
+        elif current_field in ('ПРЗ', 'САЛ', 'ЭРГ'):
             RNB_department = 'НФ РНБ 2ой УБР'
 
         # Третий УБР
@@ -296,7 +293,7 @@ def _get_inf_about_RNB_department(rig_for_define_next_position: RigPosition) -> 
 
     elif rig_contractor == 'ХМФ РНБ':
         # Первый УБР
-        if current_field in ['ПРОл', 'ПРОп', 'ПРЗ', 'САЛ']:
+        if current_field in ('ПРОл', 'ПРОп', 'ПРЗ', 'САЛ'):
             RNB_department = 'ХМФ РНБ 1ый УБР'
 
         # Четвертный УБР

@@ -20,12 +20,12 @@ from .services.define_rigs_for_definition_next_position import _get_status_to_pa
 from .services.func_for_view import handle_uploaded_file, _change_next_position, get_search_result
 from .services.get_rating import _get_marker_for_drilling_rig, _get_inf_about_RNB_department
 
-# logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def start_page(request):
     """Рендерит стартовую страницу"""
-    # logger.warning('Сервер работает, все ОК')
+    logger.warning('Сервер работает, все ОК')
 
     return render(request, 'dvizhenie/start_page.html')
 
@@ -205,7 +205,7 @@ class NextPositionView(LoginRequiredMixin, PermissionRequiredMixin, ListView, Fo
         if form.is_valid():
             define_position_and_put_into_BD(start_date_for_calculation=form.cleaned_data['start_date_for_calculation'],
                                             end_date_for_calculation=form.cleaned_data['end_date_for_calculation'])
-            # logger.warning('Произведен расчет движения')
+            logger.warning('Произведен расчет движения')
             return redirect('next_position')
         else:
             return render(request, 'dvizhenie/next_position_not_valid_data.html')
@@ -278,7 +278,6 @@ def commit_next_position(request, pk):
 
 @login_required(login_url='accounts/')
 @permission_required(perm='dvizhenie.change_nextposition', raise_exception=True)
-@transaction.atomic
 def change_next_position(request, pk):
     """Берет из рейтинга другую позицию для БУ и вставляет в NextPosition со статусом
     'Изменено. Требуется подтверждение'"""
@@ -308,7 +307,7 @@ class CommitedNextPositionView(LoginRequiredMixin, ListView):
 
     template_name = 'dvizhenie/commited_next_position.html'
     context_object_name = 'next_positions'
-    queryset = NextPosition.objects.filter(status='Подтверждено')
+    queryset = NextPosition.objects.filter(status='Подтверждено').order_by('current_position__end_date')
 
 
 @login_required(login_url='accounts/')

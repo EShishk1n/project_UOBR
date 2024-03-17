@@ -142,7 +142,7 @@ class GetRatingTestCase(TestCase):
         for pad in (self.pad_2, self.pad_9, self.pad_10):
             result.append(_get_first_stage_date_rating(self.rig_position_1, pad))
 
-        self.assertEquals(result, [10, 0, 6])
+        self.assertEquals(result, [10, 0.5, 6])
 
     def test__get_second_stage_date_rating(self):
         result = []
@@ -209,7 +209,7 @@ class GetRatingTestCase(TestCase):
             _get_rating_and_put_into_BD(self.rig_position_1, pad)
             _get_rating_and_put_into_BD(self.rig_position_2, pad)
 
-        self.assertEquals(PositionRating.objects.all().count(), 8)
+        self.assertEquals(PositionRating.objects.all().count(), 9)
 
 
 class DefineRigsForDefinitionNextpositionTestCase(TestCase):
@@ -281,14 +281,16 @@ class DefineRigsForDefinitionNextpositionTestCase(TestCase):
 
         self.assertEquals(NextPosition.objects.all().count(), 1)
 
-        _put_rigs_for_define_in_NextPosition()
+        _put_rigs_for_define_in_NextPosition(start_date_for_calculation=date(2024, 9, 1),
+                                             end_date_for_calculation=date(2024, 11, 1))
 
         self.assertEquals(NextPosition.objects.all().count(), 2)
 
     def test_form_next_position(self):
         _calculate_all_ratings_and_put_into_BD(start_date_for_calculation=date(2024, 9, 1),
                                                end_date_for_calculation=date(2024, 11, 1))
-        form_next_position()
+        form_next_position(start_date_for_calculation=date(2024, 9, 1),
+                           end_date_for_calculation=date(2024, 11, 1))
 
         self.assertEquals(NextPosition.objects.all().count(), 2)
 
@@ -328,7 +330,8 @@ class DefineRigsForDefinitionNextpositionTestCase(TestCase):
         _calculate_all_ratings_and_put_into_BD(start_date_for_calculation=date(2024, 9, 1),
                                                end_date_for_calculation=date(2024, 11, 1))
 
-        form_next_position()
+        form_next_position(start_date_for_calculation=date(2024, 9, 1),
+                           end_date_for_calculation=date(2024, 11, 1))
 
         result = define_sequence_of_rigs_for_definition_positions()
 

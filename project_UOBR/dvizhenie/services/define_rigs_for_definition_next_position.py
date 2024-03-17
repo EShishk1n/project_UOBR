@@ -44,26 +44,26 @@ def define_sequence_of_rigs_for_definition_positions() -> list:
     return light_rigs + less_than_middle_rigs + ZJ + middle_rigs + less_than_heavy_rigs + SNPH_rigs + other_rigs
 
 
-def form_next_position() -> None:
+def form_next_position(start_date_for_calculation, end_date_for_calculation) -> None:
     """Формирует данные в модели NextPosition"""
 
     NextPosition.objects.exclude(status='Подтверждено').delete()
-    _put_rigs_for_define_in_NextPosition()
+    _put_rigs_for_define_in_NextPosition(start_date_for_calculation, end_date_for_calculation)
 
 
-def _put_rigs_for_define_in_NextPosition() -> None:
+def _put_rigs_for_define_in_NextPosition(start_date_for_calculation, end_date_for_calculation) -> None:
     """Вставляет в модель NextPosition, после проверки на наличие в модели,
     буровые установки для определения движения"""
 
-    rigs_for_define_next_position: [QuerySet] = PositionRating.objects.all().distinct(
-        'current_position').order_by()
+    rigs_for_define_next_position: [QuerySet] = _get_rigs_for_calculation_rating(start_date_for_calculation,
+                                                                                 end_date_for_calculation)
 
     rigs_for_define_next_position_already_in_model: [QuerySet] = NextPosition.objects.all().values_list(
         'current_position')
 
     for rig_for_define_next_position in rigs_for_define_next_position:
-        if (rig_for_define_next_position.current_position.id,) not in rigs_for_define_next_position_already_in_model:
-            NextPosition(current_position=rig_for_define_next_position.current_position).save()
+        if (rig_for_define_next_position.id,) not in rigs_for_define_next_position_already_in_model:
+            NextPosition(current_position=rig_for_define_next_position).save()
 
 
 def _get_rigs_for_calculation_rating(start_date_for_calculation: datetime.date,
