@@ -496,10 +496,10 @@ class NextPositionTestCase(TestCase):
                                          {'start_date_for_calculation': '01.02.2024',
                                           'end_date_for_calculation': '01.04.2024'})
         self.assertEquals(response_perm.status_code, 302)
-        self.assertEquals(NextPosition.objects.all().count(), 1)
-        self.assertEquals(NextPosition.objects.all()[0].current_position, self.rig_position_1)
-        self.assertEquals(NextPosition.objects.all()[0].next_position, self.pad_4)
-        self.assertEquals(NextPosition.objects.all()[0].status, 'Требуется подтверждение')
+        self.assertEquals(NextPosition.objects.all().count(), 2)
+        self.assertEquals(NextPosition.objects.all()[1].current_position, self.rig_position_1)
+        self.assertEquals(NextPosition.objects.all()[1].next_position, None)
+        self.assertEquals(NextPosition.objects.all()[1].status, 'Отсутствуют кандидаты')
 
     def test_get_detail_info_for_next_position(self):
         """Проверяет функционал по получению детальной информации по объекту NextPoition"""

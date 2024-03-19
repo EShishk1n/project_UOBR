@@ -36,7 +36,8 @@ def _calculate_all_ratings_and_put_into_BD(start_date_for_calculation: datetime.
                                                                      end_date_for_calculation)
     free_pads = (Pad.objects.exclude(status='drilling') &
                  Pad.objects.exclude(status='drilled') &
-                 Pad.objects.exclude(status='commited_next_positions'))
+                 Pad.objects.exclude(status='commited_next_positions') &
+                 Pad.objects.exclude(status='changed_next_positions'))
 
     for rig_for_define_next_position in rigs_for_define_next_position:
         for free_pad in free_pads:
@@ -51,7 +52,7 @@ def _define_next_position(rig_for_define_next_position: RigPosition) -> dict:
 
     if not positions:
         next_position = None
-        status = 'Отсутствют кандидаты'
+        status = 'Отсутствуют кандидаты'
 
     else:
         next_position = positions.first().next_position

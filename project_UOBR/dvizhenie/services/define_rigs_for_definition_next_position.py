@@ -47,7 +47,8 @@ def define_sequence_of_rigs_for_definition_positions() -> list:
 def form_next_position(start_date_for_calculation, end_date_for_calculation) -> None:
     """Формирует данные в модели NextPosition"""
 
-    NextPosition.objects.exclude(status='Подтверждено').delete()
+    status_to_exclude = ['Подтверждено', 'Изменено. Требуется подтверждение']
+    NextPosition.objects.exclude(status__in=status_to_exclude).delete()
     _put_rigs_for_define_in_NextPosition(start_date_for_calculation, end_date_for_calculation)
 
 
@@ -95,3 +96,6 @@ def _get_status_to_pads() -> None:
     for pad in Pad.objects.all():
         if (pad.id,) in list(NextPosition.objects.filter(status='Подтверждено').values_list('next_position')):
             Pad.objects.filter(id=pad.id).update(status='commited_next_positions')
+        if (pad.id,) in list(NextPosition.objects.filter(status='Изменено. Требуется подтверждение').values_list(
+                'next_position')):
+            Pad.objects.filter(id=pad.id).update(status='changed_next_positions')

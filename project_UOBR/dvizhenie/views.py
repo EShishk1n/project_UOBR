@@ -192,7 +192,7 @@ class NextPositionView(LoginRequiredMixin, PermissionRequiredMixin, ListView, Fo
     context_object_name = 'next_positions'
     queryset = (NextPosition.objects.filter(status='Требуется подтверждение') |
                 NextPosition.objects.filter(status='Изменено. Требуется подтверждение') |
-                NextPosition.objects.filter(status='Отсутствют кандидаты') |
+                NextPosition.objects.filter(status='Отсутствуют кандидаты') |
                 NextPosition.objects.filter(status='Удалено пользователем'))
     ordering = "current_position__end_date"
     permission_required = 'dvizhenie.view_nextposition'
