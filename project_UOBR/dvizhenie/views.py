@@ -18,7 +18,6 @@ from .services.data_taker import take_file_cration_data
 from .services.define_position import define_position_and_put_into_BD
 from .services.define_rigs_for_definition_next_position import _get_status_to_pads
 from .services.func_for_view import handle_uploaded_file, _change_next_position, get_search_result
-from .services.get_rating import _get_marker_for_drilling_rig, _get_inf_about_RNB_department
 
 logger = logging.getLogger(__name__)
 
@@ -221,14 +220,8 @@ def get_detail_info_for_next_position(request, pk):
                 PositionRating.objects.filter(current_position=next_position_object.current_position.id)
                 & PositionRating.objects.filter(next_position=next_position_object.next_position.id))
 
-        marker = _get_marker_for_drilling_rig(
-            rig_for_define_next_position=position_rating[0].current_position)
-
-        strategy = _get_inf_about_RNB_department(
-            rig_for_define_next_position=position_rating[0].current_position)
-
         return render(request, 'dvizhenie/position_rating.html',
-                      {"position_rating": position_rating[0], "marker": marker, "strategy": strategy})
+                      {"position_rating": position_rating[0]})
 
 
 @login_required(login_url='accounts/')
@@ -238,14 +231,8 @@ def get_detail_info_for_position_rating(request, pk):
     if request.method == 'GET':
         position_rating = PositionRating.objects.filter(id=pk)
 
-        marker = _get_marker_for_drilling_rig(
-            rig_for_define_next_position=position_rating[0].current_position)
-
-        strategy = _get_inf_about_RNB_department(
-            rig_for_define_next_position=position_rating[0].current_position)
-
         return render(request, 'dvizhenie/position_rating.html',
-                      {"position_rating": position_rating[0], "marker": marker, "strategy": strategy})
+                      {"position_rating": position_rating[0]})
 
 
 @login_required(login_url='accounts/')
@@ -285,7 +272,10 @@ def change_next_position(request, pk):
     if request.method == 'GET':
         different_next_position = PositionRating.objects.filter(id=pk)[0]
         _change_next_position(different_next_position=different_next_position)
-
+        define_position_and_put_into_BD(
+            start_date_for_calculation=NextPosition.objects.first().current_position.end_date,
+            end_date_for_calculation=NextPosition.objects.last().current_position.end_date)
+        logger.warning('Произведен расчет движения')
     return redirect('next_position')
 
 
@@ -298,6 +288,24 @@ def delete_next_position(request, pk):
     if request.method == 'GET':
         NextPosition.objects.filter(id=pk).update(next_position=None)
         NextPosition.objects.filter(id=pk).update(status='Удалено пользователем')
+        define_position_and_put_into_BD(
+            start_date_for_calculation=NextPosition.objects.first().current_position.end_date,
+            end_date_for_calculation=NextPosition.objects.last().current_position.end_date)
+
+    return redirect('next_position')
+
+
+@login_required(login_url='accounts/')
+@permission_required(perm='dvizhenie.change_nextposition', raise_exception=True)
+@transaction.atomic
+def reset_all_changes(request):
+    """Сбрасывает все пользовательские изменения"""
+
+    if request.method == 'GET':
+        NextPosition.objects.exclude(status='Подтверждено').update(status='')
+        define_position_and_put_into_BD(
+            start_date_for_calculation=NextPosition.objects.first().current_position.end_date,
+            end_date_for_calculation=NextPosition.objects.last().current_position.end_date)
 
     return redirect('next_position')
 

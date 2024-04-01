@@ -13,23 +13,22 @@ def _get_rating_and_put_into_BD(rig_for_define_next_position: RigPosition, free_
     mud_rating = _get_mud_rating(rig_for_define_next_position, free_pad)
     logistic_rating = _get_logistic_rating(rig_for_define_next_position, free_pad)
     marker_rating = _get_marker_rating(rig_for_define_next_position, free_pad)
-    strategy_rating = _get_strategy_rating(rig_for_define_next_position, free_pad)
 
     if (capacity_rating * first_stage_date_rating * second_stage_date_rating * mud_rating * logistic_rating
-            * marker_rating * strategy_rating == 0):
+            * marker_rating == 0):
         pass
 
     else:
         common_rating = (
-                capacity_rating * 2.5 + first_stage_date_rating * 1.5 + second_stage_date_rating * 0.7 + mud_rating * 1
-                + logistic_rating * 3 + marker_rating * 0.1 + strategy_rating * 1.2)
+                capacity_rating * 2.5 + first_stage_date_rating * 2.1 + second_stage_date_rating * 0.7 + mud_rating * 1.6
+                + logistic_rating * 3 + marker_rating * 0.1)
 
         ratings = PositionRating(current_position=rig_for_define_next_position,
                                  next_position=free_pad,
                                  capacity_rating=capacity_rating, first_stage_date_rating=first_stage_date_rating,
                                  second_stage_date_rating=second_stage_date_rating, mud_rating=mud_rating,
                                  logistic_rating=logistic_rating, marker_rating=marker_rating,
-                                 strategy_rating=strategy_rating, common_rating=common_rating)
+                                 common_rating=common_rating)
 
         ratings.save()
 
@@ -79,9 +78,9 @@ def _get_first_stage_date_rating(rig_for_define_next_position: RigPosition, free
 
     # Первый этап будет готов через 7 дней после выхода БУ (9 баллов)
     elif end_date + timedelta(7) >= first_stage_date:
-        first_stage_date_rating = 9 
+        first_stage_date_rating = 9
 
-    # Первый этап будет готов через 12 дней после выхода БУ (6 баллов)
+        # Первый этап будет готов через 12 дней после выхода БУ (6 баллов)
     elif end_date + timedelta(12) >= first_stage_date:
         first_stage_date_rating = 6
 
@@ -223,84 +222,3 @@ def _get_marker_for_drilling_rig(rig_for_define_next_position: RigPosition) -> s
         marker_for_rig_position = 'стандартная БУ'
 
     return marker_for_rig_position
-
-
-def _get_strategy_rating(rig_for_define_next_position: RigPosition, free_pad: Pad) -> float:
-    """Получает рейтинг соответствия стратегии"""
-
-    RNB_department = _get_inf_about_RNB_department(rig_for_define_next_position)
-    next_field = str(free_pad.field)
-
-    if RNB_department == 'НФ РНБ 1ый УБР':
-        # НФ РНБ первый УБР на ПРО
-        if next_field in ('ПРОл', 'ПРОп', 'ЭРГ'):
-            strategy_rating = 10
-        else:
-            strategy_rating = 1
-
-    elif RNB_department == 'НФ РНБ 2ой УБР':
-        # НФ РНБ второй УБР на Правдинском регионе
-        if next_field in ('ПРЗ', 'САЛ', 'ЭРГ'):
-            strategy_rating = 10
-        else:
-            strategy_rating = 1
-
-    elif RNB_department == 'НФ РНБ 3ий УБР':
-        # НФ РНБ третий УБР на Юганском и Майском регионе
-        if next_field not in ('ПРОл', 'ПРОп', 'ЭРГ', 'ПРЗ', 'САЛ'):
-            strategy_rating = 10
-        else:
-            strategy_rating = 1
-
-    elif RNB_department == 'ХМФ РНБ 1ый УБР':
-        # ХМФ РНБ первый УБР на ПРО
-        if next_field in ('ПРОл', 'ПРОп', 'ЭРГ'):
-            strategy_rating = 10
-        else:
-            strategy_rating = 1
-
-    elif RNB_department == 'ХМФ РНБ 4ый УБР':
-        # ХМФ РНБ четвертный УБР на Юганском, Майском, Правдинском регионе
-        if next_field not in ('ПРОл', 'ПРОп', 'ЭРГ'):
-            strategy_rating = 10
-        else:
-            strategy_rating = 1
-
-    else:
-        strategy_rating = 10
-
-    return strategy_rating
-
-
-def _get_inf_about_RNB_department(rig_for_define_next_position: RigPosition) -> str:
-    """Получает информацию о подразделении (УБР) филиалов РН-Бурение"""
-
-    rig_contractor = str(rig_for_define_next_position.drilling_rig.contractor)
-    current_field = str(rig_for_define_next_position.pad.field)
-
-    if rig_contractor == 'НФ РНБ':
-        # Первый УБР
-        if current_field in ('ПРОл', 'ПРОп'):
-            RNB_department = 'НФ РНБ 1ый УБР'
-
-        # Второй УБР
-        elif current_field in ('ПРЗ', 'САЛ', 'ЭРГ'):
-            RNB_department = 'НФ РНБ 2ой УБР'
-
-        # Третий УБР
-        else:
-            RNB_department = 'НФ РНБ 3ий УБР'
-
-    elif rig_contractor == 'ХМФ РНБ':
-        # Первый УБР
-        if current_field in ('ПРОл', 'ПРОп', 'ПРЗ', 'САЛ'):
-            RNB_department = 'ХМФ РНБ 1ый УБР'
-
-        # Четвертный УБР
-        else:
-            RNB_department = 'ХМФ РНБ 4ый УБР'
-
-    else:
-        RNB_department = 'нет стратегии'
-
-    return RNB_department

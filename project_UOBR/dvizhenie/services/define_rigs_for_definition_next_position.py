@@ -10,7 +10,8 @@ def define_sequence_of_rigs_for_definition_positions() -> list:
 
     rigs_for_define_next_position = (
             NextPosition.objects.exclude(status='Подтверждено').order_by('current_position__end_date') &
-            NextPosition.objects.exclude(status='Изменено. Требуется подтверждение'))
+            NextPosition.objects.exclude(status='Изменено. Требуется подтверждение') &
+            NextPosition.objects.exclude(status='Удалено пользователем'))
 
     light_rigs = []
     less_than_middle_rigs = []
@@ -47,7 +48,7 @@ def define_sequence_of_rigs_for_definition_positions() -> list:
 def form_next_position(start_date_for_calculation, end_date_for_calculation) -> None:
     """Формирует данные в модели NextPosition"""
 
-    status_to_exclude = ['Подтверждено', 'Изменено. Требуется подтверждение']
+    status_to_exclude = ['Подтверждено', 'Изменено. Требуется подтверждение', 'Удалено пользователем']
     NextPosition.objects.exclude(status__in=status_to_exclude).delete()
     _put_rigs_for_define_in_NextPosition(start_date_for_calculation, end_date_for_calculation)
 

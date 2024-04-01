@@ -12,7 +12,7 @@ from dvizhenie.services.define_rigs_for_definition_next_position import _get_sta
     define_sequence_of_rigs_for_definition_positions
 from dvizhenie.services.get_rating import _get_capacity_rating, _get_first_stage_date_rating, \
     _get_second_stage_date_rating, _get_mud_rating, _get_logistic_rating, _get_marker_for_drilling_rig, \
-    _get_marker_rating, _get_inf_about_RNB_department, _get_strategy_rating, _get_rating_and_put_into_BD
+    _get_marker_rating, _get_rating_and_put_into_BD
 
 
 class DataTakerTestCase(TestCase):
@@ -182,22 +182,6 @@ class GetRatingTestCase(TestCase):
 
         self.assertEquals(result1, 4)
         self.assertEquals(result2, [10, 0, 10, 0])
-
-    def test__get_inf_about_RNB_department(self):
-        result1 = _get_inf_about_RNB_department(self.rig_position_1)
-        result2 = _get_inf_about_RNB_department(self.rig_position_2)
-
-        self.assertEquals(result1, 'НФ РНБ 2ой УБР')
-        self.assertEquals(result2, 'нет стратегии')
-
-    def test__strategy_rating(self):
-        result = []
-        for pad in (
-                self.pad_2, self.pad_3, self.pad_4, self.pad_5, self.pad_6, self.pad_7, self.pad_8, self.pad_9,
-                self.pad_10):
-            result.append(_get_strategy_rating(self.rig_position_1, pad))
-
-        self.assertEquals(result, [1, 1, 1, 1, 10, 1, 1, 1, 10])
 
     def test__get_rating_and_put_into_BD(self):
 

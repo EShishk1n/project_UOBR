@@ -163,7 +163,6 @@ class PositionRating(models.Model):
     mud_rating = models.FloatField()
     logistic_rating = models.FloatField()
     marker_rating = models.FloatField()
-    strategy_rating = models.FloatField()
     common_rating = models.FloatField()
     status = models.CharField(default='')
 

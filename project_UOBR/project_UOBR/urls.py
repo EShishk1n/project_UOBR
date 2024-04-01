@@ -49,6 +49,7 @@ urlpatterns = [
     path('export_data_rig_positions', views.export_data_rig_positions, name='export_data_rig_positions'),
     path('change_next_position/<int:pk>', views.change_next_position, name='change_next_position'),
     path('delete_next_position/<int:pk>', views.delete_next_position, name='delete_next_position'),
+    path('reset_all_changes', views.reset_all_changes, name='reset_all_changes'),
     path('commited_next_position', views.CommitedNextPositionView.as_view(), name='commited_next_position'),
     path('delete_commited_position/<int:pk>', views.delete_commited_position, name='delete_commited_position'),
     path('commit_commited_position/<int:pk>', views.commit_commited_position, name='commit_commited_position'),

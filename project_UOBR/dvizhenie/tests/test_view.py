@@ -437,7 +437,6 @@ class NextPositionTestCase(TestCase):
                                                                mud_rating=6,
                                                                logistic_rating=4,
                                                                marker_rating=10,
-                                                               strategy_rating=10,
                                                                common_rating=76)
         self.position_rating_2 = PositionRating.objects.create(current_position=self.rig_position_1,
                                                                next_position=self.pad_2,
@@ -447,7 +446,6 @@ class NextPositionTestCase(TestCase):
                                                                mud_rating=6,
                                                                logistic_rating=2,
                                                                marker_rating=10,
-                                                               strategy_rating=10,
                                                                common_rating=63)
         self.next_position_1 = NextPosition.objects.create(current_position=self.rig_position_1,
                                                            next_position=self.pad_3, status='Требуется подтверждение')
@@ -515,7 +513,7 @@ class NextPositionTestCase(TestCase):
         response_perm = self.client.get(url)
         self.assertEquals(response_perm.status_code, 200)
         self.assertEquals(
-            {"position_rating": self.position_rating_1, "marker": 'стандартная БУ', "strategy": 'НФ РНБ 3ий УБР'},
+            {"position_rating": self.position_rating_1},
             response_perm.context[0].dicts[3])
 
     def test_get_detail_info_for_position_rating(self):
@@ -532,7 +530,7 @@ class NextPositionTestCase(TestCase):
         response_perm = self.client.get(url)
         self.assertEquals(response_perm.status_code, 200)
         self.assertEquals(
-            {"position_rating": self.position_rating_1, "marker": 'стандартная БУ', "strategy": 'НФ РНБ 3ий УБР'},
+            {"position_rating": self.position_rating_1},
             response_perm.context[0].dicts[3])
 
     def test_get_rating_for_all_possible_next_positions(self):
