@@ -50,7 +50,7 @@ SECRET_KEY = 'django-insecure-y3#mzdyh!i^7xko!+k)^tvzoq&8*3v3ut=h7-30#pju_2m+v^s
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['188.225.33.82', 'ver1.dvizhenie-zhizn.ru']
 
 # Application definition
 
@@ -105,7 +105,7 @@ WSGI_APPLICATION = 'project_UOBR.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'dvizhenie_BU',
+        'NAME': 'dvizhenie_bu',
         'USER': 'dvizhenie_user',
         'PASSWORD': '122333',
         'HOST': '127.0.0.1',
@@ -147,6 +147,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = 'static/'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

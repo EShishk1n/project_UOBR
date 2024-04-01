@@ -1,5 +1,3 @@
-import logging
-
 from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db import IntegrityError, transaction
@@ -19,12 +17,9 @@ from .services.define_position import define_position_and_put_into_BD
 from .services.define_rigs_for_definition_next_position import _get_status_to_pads
 from .services.func_for_view import handle_uploaded_file, _change_next_position, get_search_result
 
-logger = logging.getLogger(__name__)
-
 
 def start_page(request):
     """Рендерит стартовую страницу"""
-    logger.warning('Сервер работает, все ОК')
 
     return render(request, 'dvizhenie/start_page.html')
 
@@ -204,7 +199,6 @@ class NextPositionView(LoginRequiredMixin, PermissionRequiredMixin, ListView, Fo
         if form.is_valid():
             define_position_and_put_into_BD(start_date_for_calculation=form.cleaned_data['start_date_for_calculation'],
                                             end_date_for_calculation=form.cleaned_data['end_date_for_calculation'])
-            logger.warning('Произведен расчет движения')
             return redirect('next_position')
         else:
             return render(request, 'dvizhenie/next_position_not_valid_data.html')
@@ -275,7 +269,6 @@ def change_next_position(request, pk):
         define_position_and_put_into_BD(
             start_date_for_calculation=NextPosition.objects.first().current_position.end_date,
             end_date_for_calculation=NextPosition.objects.last().current_position.end_date)
-        logger.warning('Произведен расчет движения')
     return redirect('next_position')
 
 
@@ -391,9 +384,6 @@ def export_data_rig_positions(request):
                 if result is None:
                     return redirect('rig_position')
                 else:
-                    logger.warning(
-                        'Возникла ошибка при акутуализации данных по выходу БУ %s %s' % (
-                            result['rig_position']['number'], result['rig_position']['field']))
                     return render(request, "dvizhenie/export_data_rig_positions.html",
                                   dict(error_message=result['error_message'], error_rig_position=str(
                                       result['rig_position']['number']) + str(result['rig_position']['field'])))
@@ -426,9 +416,6 @@ def export_data_pads(request):
                 if result is None:
                     return redirect('pad')
                 else:
-                    logger.warning(
-                        'Возникла ошибка при поытке вставить месторожедение не из перечня %s %s' % (
-                            result['pad_data']['number'], result['pad_data']['field']))
                     return render(request, "dvizhenie/export_data_pads.html",
                                   dict(error_message=result['error_message'], error_pad_data=str(
                                       result['pad_data']['number']) + str(result['pad_data']['field'])))
@@ -442,11 +429,9 @@ def export_data_pads(request):
         return render(request, "dvizhenie/export_data_pads.html", {"form": form,
                                                                    "file_creation_date": file_creation_date})
     except AttributeError:
-        logger.warning('Возникла ошибка при акутуализации данных по выходу БУ')
         return render(request, "dvizhenie/export_data_pads.html",
                       {"error_message": 'Проверьте корректность заполнения таблицы в файле!!!'})
     except IntegrityError:
-        logger.warning('Возникла ошибка при акутуализации данных по выходу БУ')
         return render(request, "dvizhenie/export_data_pads.html",
                       {"error_message": 'Проверьте корректность заполнения таблицы в файле!!!'})
 
