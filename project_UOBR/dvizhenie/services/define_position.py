@@ -1,5 +1,4 @@
-from datetime import datetime
-
+import datetime
 from dvizhenie.models import PositionRating, NextPosition, RigPosition, Pad
 from .define_rigs_for_definition_next_position import _get_rigs_for_calculation_rating, \
     define_sequence_of_rigs_for_definition_positions, form_next_position

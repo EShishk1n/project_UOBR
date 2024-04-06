@@ -1,8 +1,9 @@
-from datetime import date, datetime
+from collections import Counter
+from datetime import datetime
 
 from django.db.models import QuerySet
 
-from dvizhenie.models import RigPosition, Pad, PositionRating, NextPosition
+from dvizhenie.models import RigPosition, Pad, NextPosition
 
 
 def define_sequence_of_rigs_for_definition_positions() -> list:
@@ -81,22 +82,40 @@ def _get_rigs_for_calculation_rating(start_date_for_calculation: datetime.date,
 def _get_status_to_pads() -> None:
     """Присваивает статус 'в бурении/пробурен' кустам"""
 
-    Pad.objects.all().update(status='')
+    # Поучаем список всех буровых в RigPosition, которые упоминаются более 1 раза ( = уже переезжали)
+    rig_positions_id = []
+    for rig_position_id in RigPosition.objects.exclude(pad__status='drilled').values_list('drilling_rig__id'):
+        rig_positions_id.append(rig_position_id[0])
 
-    # Всем кустам, упомянутым в модели RigPosition, присваивается статус "drilling"
-    for rig_position in RigPosition.objects.all():
-        Pad.objects.filter(id=rig_position.pad.id).update(status='drilling')
+    counter = Counter(rig_positions_id)
+    dislocated_drilling_rigs = list(key for key in counter if counter[key] > 1)
 
-        # Если буровая установка упомниается больше одного раза, то всем кустам, на которых была данная БУ (кроме
-        # последнего), присваивается статус "drilled"
-        rig_position_for_one_DR = RigPosition.objects.filter(drilling_rig=rig_position.drilling_rig)
-        if rig_position_for_one_DR.count() > 1:
-            for rig_position_ in list(rig_position_for_one_DR)[:-1]:
-                Pad.objects.filter(id=rig_position_.pad.id).update(status='drilled')
+    # Поучаем список всех отбуренных кустов и обновляем статус drilled в Pad
+    drilled_pads_id = []
 
-    for pad in Pad.objects.all():
-        if (pad.id,) in list(NextPosition.objects.filter(status='Подтверждено').values_list('next_position')):
-            Pad.objects.filter(id=pad.id).update(status='commited_next_positions')
-        if (pad.id,) in list(NextPosition.objects.filter(status='Изменено. Требуется подтверждение').values_list(
-                'next_position')):
-            Pad.objects.filter(id=pad.id).update(status='changed_next_positions')
+    for dislocated_drilling_rig in dislocated_drilling_rigs:
+        drilled_pads_id.append(
+            RigPosition.objects.filter(drilling_rig__id=dislocated_drilling_rig).values_list('pad')[0][0])
+
+    Pad.objects.filter(id__in=drilled_pads_id).update(status='drilled')
+
+    # Поучаем список всех кустов, на которых стоят буровые ( = все элементы, кроме статуса 'drilled')
+    drilling_pads_id = []
+    for drilling_and_drilled_pad_id in RigPosition.objects.exclude(pad__status='drilled').values_list('pad'):
+        drilling_pads_id.append(drilling_and_drilled_pad_id[0])
+
+    # Получаем список кустов на которые подтверждено движение буровой установки
+    commited_next_position_pads = []
+    for commited_next_position_pad in NextPosition.objects.filter(status='Подтверждено').values_list('next_position'):
+        commited_next_position_pads.append(commited_next_position_pad[0])
+
+    # Получаем список кустов на который выбрано движение "вручную"
+    changed_next_position_pads = []
+    for changed_next_position_pad in NextPosition.objects.filter(
+            status='Изменено. Требуется подтверждение').values_list('next_position'):
+        changed_next_position_pads.append(changed_next_position_pad[0])
+
+    # Обновляем статусы в Pad
+    Pad.objects.filter(id__in=drilling_pads_id).update(status='drilling')
+    Pad.objects.filter(id__in=commited_next_position_pads).update(status='commited_next_positions')
+    Pad.objects.filter(id__in=changed_next_position_pads).update(status='changed_next_positions')

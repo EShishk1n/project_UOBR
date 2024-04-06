@@ -15,32 +15,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# LOGGING = {
-#     "version": 1,
-#     "disable_existing_loggers": False,
-#     "formatters": {
-#         "verbose": {
-#             "format": "{asctime} {module} {message} {args}",
-#             "style": "{",
-#         },
-#     },
-#     "handlers": {
-#         "file": {
-#             "level": "WARNING",
-#             "class": "logging.FileHandler",
-#             "filename": "log.log",
-#             "formatter": "verbose",
-#         },
-#     },
-#     "loggers": {
-#         "dvizhenie": {
-#             "handlers": ["file"],
-#             "level": "WARNING",
-#             "propagate": True,
-#         },
-#     },
-# }
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -48,9 +22,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-y3#mzdyh!i^7xko!+k)^tvzoq&8*3v3ut=h7-30#pju_2m+v^s'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['188.225.33.82', 'ver1.dvizhenie-zhizn.ru']
+ALLOWED_HOSTS = ['188.225.33.82', 'ver1.dvizhenie-zhizn.ru', '127.0.0.1']
 
 # Application definition
 
@@ -77,7 +51,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
+
 
 ROOT_URLCONF = 'project_UOBR.urls'
 
@@ -105,7 +81,7 @@ WSGI_APPLICATION = 'project_UOBR.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'dvizhenie_bu',
+        'NAME': 'dvizhenie_BU',
         'USER': 'dvizhenie_user',
         'PASSWORD': '122333',
         'HOST': '127.0.0.1',

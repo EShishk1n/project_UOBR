@@ -1,3 +1,5 @@
+import time
+
 from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db import IntegrityError, transaction
@@ -41,8 +43,7 @@ class DrillingRigView(LoginRequiredMixin, ListView):
 
     template_name = 'dvizhenie/rig.html'
     context_object_name = 'rigs'
-    model = DrillingRig
-    fields = '__all__'
+    queryset = DrillingRig.objects.all().select_related('type', 'contractor')
 
 
 class DrillingRigAddView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
@@ -120,7 +121,9 @@ class RigPositionView(LoginRequiredMixin, ListView):
 
     template_name = 'dvizhenie/rig_position.html'
     context_object_name = 'rig_positions'
-    queryset = RigPosition.objects.filter(pad__status='drilling')
+    queryset = RigPosition.objects.filter(pad__status='drilling').select_related('drilling_rig').select_related(
+        'pad').select_related(
+        'drilling_rig__type').select_related('drilling_rig__contractor')
 
     def get(self, request, *args, **kwargs):
 
@@ -184,13 +187,13 @@ class NextPositionView(LoginRequiredMixin, PermissionRequiredMixin, ListView, Fo
 
     template_name = 'dvizhenie/next_position.html'
     context_object_name = 'next_positions'
-    queryset = (NextPosition.objects.filter(status='Требуется подтверждение') |
-                NextPosition.objects.filter(status='Изменено. Требуется подтверждение') |
-                NextPosition.objects.filter(status='Отсутствуют кандидаты') |
-                NextPosition.objects.filter(status='Удалено пользователем'))
+    status_to_show = ['Требуется подтверждение', 'Изменено. Требуется подтверждение', 'Отсутствуют кандидаты',
+                      'Удалено пользователем']
+    queryset = NextPosition.objects.filter(status__in=status_to_show).select_related('next_position').select_related(
+        'current_position').select_related('current_position__pad').select_related(
+        'current_position__drilling_rig__type').select_related('current_position__drilling_rig__contractor')
     ordering = "current_position__end_date"
     permission_required = 'dvizhenie.view_nextposition'
-
     form_class = DefinePositionForm
 
     @transaction.atomic
@@ -200,6 +203,7 @@ class NextPositionView(LoginRequiredMixin, PermissionRequiredMixin, ListView, Fo
             define_position_and_put_into_BD(start_date_for_calculation=form.cleaned_data['start_date_for_calculation'],
                                             end_date_for_calculation=form.cleaned_data['end_date_for_calculation'])
             return redirect('next_position')
+
         else:
             return render(request, 'dvizhenie/next_position_not_valid_data.html')
 
@@ -210,9 +214,14 @@ def get_detail_info_for_next_position(request, pk):
 
     if request.method == 'GET':
         next_position_object = NextPosition.objects.get(id=pk)
-        position_rating = (
-                PositionRating.objects.filter(current_position=next_position_object.current_position.id)
-                & PositionRating.objects.filter(next_position=next_position_object.next_position.id))
+        try:
+            position_rating = PositionRating.objects.filter(current_position=next_position_object.current_position.id,
+                                                            next_position=next_position_object.next_position.id).select_related(
+                'current_position').select_related('current_position__pad').select_related(
+                'current_position__drilling_rig').select_related('current_position__drilling_rig__type').select_related(
+                'next_position')
+        except AttributeError:
+            position_rating = [None]
 
         return render(request, 'dvizhenie/position_rating.html',
                       {"position_rating": position_rating[0]})
@@ -223,7 +232,9 @@ def get_detail_info_for_position_rating(request, pk):
     """Получает подробную информацию об экземляре PositionRating (рейтинг, маркер, стратегию)"""
 
     if request.method == 'GET':
-        position_rating = PositionRating.objects.filter(id=pk)
+        position_rating = PositionRating.objects.filter(id=pk).select_related('current_position').select_related(
+            'current_position__pad').select_related('current_position__drilling_rig').select_related(
+            'current_position__drilling_rig__type').select_related('next_position')
 
         return render(request, 'dvizhenie/position_rating.html',
                       {"position_rating": position_rating[0]})
@@ -236,7 +247,11 @@ def get_rating_for_all_possible_next_positions(request, pk):
     if request.method == 'GET':
         next_position_object = NextPosition.objects.get(id=pk)
         position_rating = PositionRating.objects.filter(
-            current_position=next_position_object.current_position.id).order_by('-common_rating')
+            current_position=next_position_object.current_position.id).order_by('-common_rating').select_related(
+            'current_position').select_related(
+            'current_position__pad').select_related('current_position__drilling_rig').select_related(
+            'current_position__drilling_rig__contractor').select_related(
+            'current_position__drilling_rig__type').select_related('next_position')
 
         return render(request, 'dvizhenie/position_rating_all.html',
                       {"position_rating": position_rating})
@@ -267,7 +282,8 @@ def change_next_position(request, pk):
         different_next_position = PositionRating.objects.filter(id=pk)[0]
         _change_next_position(different_next_position=different_next_position)
         define_position_and_put_into_BD(
-            start_date_for_calculation=NextPosition.objects.first().current_position.end_date,
+            start_date_for_calculation=NextPosition.objects.exclude(
+                status='Подтверждено').first().current_position.end_date,
             end_date_for_calculation=NextPosition.objects.last().current_position.end_date)
     return redirect('next_position')
 
@@ -282,7 +298,8 @@ def delete_next_position(request, pk):
         NextPosition.objects.filter(id=pk).update(next_position=None)
         NextPosition.objects.filter(id=pk).update(status='Удалено пользователем')
         define_position_and_put_into_BD(
-            start_date_for_calculation=NextPosition.objects.first().current_position.end_date,
+            start_date_for_calculation=NextPosition.objects.exclude(
+                status='Подтверждено').first().current_position.end_date,
             end_date_for_calculation=NextPosition.objects.last().current_position.end_date)
 
     return redirect('next_position')
@@ -297,7 +314,8 @@ def reset_all_changes(request):
     if request.method == 'GET':
         NextPosition.objects.exclude(status='Подтверждено').update(status='')
         define_position_and_put_into_BD(
-            start_date_for_calculation=NextPosition.objects.first().current_position.end_date,
+            start_date_for_calculation=NextPosition.objects.exclude(
+                status='Подтверждено').first().current_position.end_date,
             end_date_for_calculation=NextPosition.objects.last().current_position.end_date)
 
     return redirect('next_position')
@@ -308,7 +326,10 @@ class CommitedNextPositionView(LoginRequiredMixin, ListView):
 
     template_name = 'dvizhenie/commited_next_position.html'
     context_object_name = 'next_positions'
-    queryset = NextPosition.objects.filter(status='Подтверждено').order_by('current_position__end_date')
+    queryset = NextPosition.objects.filter(status='Подтверждено').order_by('current_position__end_date').select_related(
+        'next_position').select_related(
+        'current_position').select_related('current_position__pad').select_related(
+        'current_position__drilling_rig__type').select_related('current_position__drilling_rig__contractor')
 
 
 @login_required(login_url='accounts/')

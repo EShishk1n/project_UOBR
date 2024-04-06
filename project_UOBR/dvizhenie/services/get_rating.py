@@ -20,8 +20,8 @@ def _get_rating_and_put_into_BD(rig_for_define_next_position: RigPosition, free_
 
     else:
         common_rating = (
-                capacity_rating * 2.5 + first_stage_date_rating * 2.1 + second_stage_date_rating * 0.7 + mud_rating * 1.6
-                + logistic_rating * 3 + marker_rating * 0.1)
+                capacity_rating * 2.5 + first_stage_date_rating * 2.1 + second_stage_date_rating * 0.7 + mud_rating *
+                1.6 + logistic_rating * 3 + marker_rating * 0.1)
 
         ratings = PositionRating(current_position=rig_for_define_next_position,
                                  next_position=free_pad,
