@@ -14,6 +14,9 @@ def _change_next_position(different_next_position: PositionRating):
     """Меняет автоматически полученную следующую позицию на выбранную"""
 
     try:
+        previos_next_position = NextPosition.objects.filter(current_position=different_next_position.current_position)[
+            0].next_position
+        Pad.objects.filter(id=previos_next_position.id).update(status='')
         NextPosition.objects.filter(current_position=different_next_position.current_position).update(
             next_position=different_next_position.next_position)
     except IntegrityError:
