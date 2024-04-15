@@ -2,7 +2,14 @@ from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 
-class type_of_DR(models.Model):
+class BaseModel(models.Model):
+    objects = models.Manager()
+
+    class Meta:
+        abstract = True
+
+
+class type_of_DR(BaseModel):
     """Типовые буровые установки"""
 
     type = models.CharField(unique=True)
@@ -11,7 +18,7 @@ class type_of_DR(models.Model):
         return f'{self.type}'
 
 
-class Contractor(models.Model):
+class Contractor(BaseModel):
     """Типовые наименования подрядных организаций по бурению"""
 
     contractor = models.CharField()
@@ -63,7 +70,7 @@ class Field(models.TextChoices):
     YS = 'ЮС', 'Южно-Сургутское'
 
 
-class DrillingRig(models.Model):
+class DrillingRig(BaseModel):
     """Буровые установки с основной информацией"""
 
     type = models.ForeignKey(type_of_DR, on_delete=models.CASCADE)
@@ -88,7 +95,7 @@ class DrillingRig(models.Model):
         return str(f'БУ {self.type} зав.№{self.number} {self.contractor}')
 
 
-class Pad(models.Model):
+class Pad(BaseModel):
     """Кустовые площадки с основной информацией"""
 
     class Capacity(models.IntegerChoices):
@@ -109,14 +116,20 @@ class Pad(models.Model):
     gs_quantity = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(24)])
     nns_quantity = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(24)])
 
-    class marker(models.TextChoices):
+    class Marker(models.TextChoices):
         ordinary = 'нет', 'обычный куст'
         special_project = 'для 2эш', 'для 2эш'
         SNPH = 'СНПХ', 'возможно бурение СНПХ'
         priority = 'приоритет', 'приоритетное движение'
 
-    marker = models.CharField(choices=marker.choices, default=marker.ordinary)
-    status = models.CharField(default='')
+    class Status(models.TextChoices):
+        free = 'free'
+        drilled = 'drilled'
+        drilling = 'drilling'
+        reserved = 'reserved'
+
+    marker = models.CharField(choices=Marker.choices, default=Marker.ordinary)
+    status = models.CharField(choices=Status.choices, default=Status.free)
 
     class Meta:
         ordering = ['first_stage_date']
@@ -125,7 +138,7 @@ class Pad(models.Model):
         return str(f'{self.number} {self.field}')
 
 
-class RigPosition(models.Model):
+class RigPosition(BaseModel):
     """Текущее местоположение буровых установок"""
 
     drilling_rig = models.ForeignKey(DrillingRig, on_delete=models.CASCADE)
@@ -140,18 +153,24 @@ class RigPosition(models.Model):
         return str(f'{self.pad}')
 
 
-class NextPosition(models.Model):
+class NextPosition(BaseModel):
     """Пары буровая-следущий куст"""
+
+    class Status(models.TextChoices):
+        default = 'default', 'Требуется подтверждение'
+        commited = 'commited', 'Подтверждено'
+        deleted = 'deleted', 'Удалено пользователем'
+        changed = 'changed', 'Изменено. Требуется подтверждение'
 
     current_position = models.OneToOneField(RigPosition, on_delete=models.CASCADE)
     next_position = models.OneToOneField(Pad, null=True, blank=True, on_delete=models.CASCADE)
-    status = models.CharField(default='')
+    status = models.CharField(choices=Status.choices, default=Status.default)
 
     def __str__(self):
         return str(f'Буровой установке {self.current_position} определено движение на {self.next_position}')
 
 
-class PositionRating(models.Model):
+class PositionRating(BaseModel):
     """Пары буровая-следующий куст с рейтингами"""
 
     current_position = models.ForeignKey(RigPosition, on_delete=models.CASCADE)
@@ -164,6 +183,15 @@ class PositionRating(models.Model):
     marker_rating = models.FloatField()
     common_rating = models.FloatField()
     status = models.CharField(default='')
+
+    def calculate_common_rating(self) -> float:
+
+        common_rating: float = (
+                self.capacity_rating * 2.5 + self.first_stage_date_rating * 2.1 +
+                self.second_stage_date_rating * 0.7 + self.mud_rating * 1.6
+                + self.logistic_rating * 3 + self.marker_rating * 0.1)
+
+        return common_rating
 
     class Meta:
         ordering = ["current_position"]

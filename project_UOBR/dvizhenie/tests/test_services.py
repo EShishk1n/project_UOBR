@@ -5,14 +5,10 @@ from dvizhenie.models import Pad, type_of_DR, Contractor, DrillingRig, RigPositi
 from dvizhenie.services.data_putter import put_rigs_position_data, put_pads_data
 from dvizhenie.services.data_taker import open_work_sheet, take_rigs_position_data, take_pads_data, \
     take_file_cration_data
-from dvizhenie.services.define_position import _calculate_all_ratings_and_put_into_BD, _define_next_position, \
+from dvizhenie.services.define_position import calculate_all_ratings_and_put_into_BD, _define_next_position, \
     define_position_and_put_into_BD
-from dvizhenie.services.define_rigs_for_definition_next_position import _get_status_to_pads, \
-    _get_rigs_for_calculation_rating, _put_rigs_for_define_in_NextPosition, form_next_position, \
-    define_sequence_of_rigs_for_definition_positions
-from dvizhenie.services.get_rating import _get_capacity_rating, _get_first_stage_date_rating, \
-    _get_second_stage_date_rating, _get_mud_rating, _get_logistic_rating, _get_marker_for_drilling_rig, \
-    _get_marker_rating, _get_rating_and_put_into_BD
+
+from dvizhenie.services.give_statuses_to_pads import give_statuses_to_pads
 
 
 class DataTakerTestCase(TestCase):
@@ -196,6 +192,7 @@ class GetRatingTestCase(TestCase):
         self.assertEquals(PositionRating.objects.all().count(), 9)
 
 
+
 class DefineRigsForDefinitionNextpositionTestCase(TestCase):
 
     def setUp(self):
@@ -238,20 +235,20 @@ class DefineRigsForDefinitionNextpositionTestCase(TestCase):
         self.rig_position_2 = RigPosition.objects.create(drilling_rig=self.drilling_rig_1, pad=self.pad_2,
                                                          start_date=date(2024, 5, 1), end_date=date(2024, 10, 1))
         self.next_position = NextPosition.objects.create(current_position=self.rig_position_2, next_position=self.pad_3,
-                                                         status='Подтверждено')
+                                                         status='commited')
         self.contractor2 = Contractor.objects.create(contractor='СНПХ')
         self.drilling_rig_2 = DrillingRig.objects.create(type=self.type_of_DR, number=777, contractor=self.contractor2,
                                                          mud='РВО')
-        self.rig_position_2 = RigPosition.objects.create(drilling_rig=self.drilling_rig_2, pad=self.pad_9,
+        self.rig_position_3 = RigPosition.objects.create(drilling_rig=self.drilling_rig_2, pad=self.pad_9,
                                                          start_date=date(2023, 2, 10), end_date=date(2024, 9, 20))
 
-    def test__get_status_to_pads(self):
-        _get_status_to_pads()
+    def test_get_statuses_to_pads(self):
+        get_statuses_to_pads()
 
         self.assertEquals(Pad.objects.filter(number='133')[0].status, 'drilled')
         self.assertEquals(Pad.objects.filter(number='110')[0].status, 'drilling')
-        self.assertEquals(Pad.objects.filter(number='669')[0].status, 'commited_next_positions')
-        self.assertEquals(Pad.objects.filter(number='58')[0].status, '')
+        self.assertEquals(Pad.objects.filter(number='669')[0].status, 'reserved')
+        self.assertEquals(Pad.objects.filter(number='58')[0].status, 'free')
 
     def test__get_rigs_for_calculation_rating(self):
         result = _get_rigs_for_calculation_rating(start_date_for_calculation=date(2024, 9, 1),

@@ -52,12 +52,20 @@
         </value>
       </option>
     </inspection_tool>
+    <inspection_tool class="PyPep8Inspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="W605" />
+        </list>
+      </option>
+    </inspection_tool>
     <inspection_tool class="PyPep8NamingInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
       <option name="ignoredErrors">
         <list>
           <option value="N806" />
           <option value="N802" />
           <option value="N801" />
+          <option value="N803" />
         </list>
       </option>
     </inspection_tool>
@@ -65,6 +73,7 @@
       <option name="ignoredNames">
         <list>
           <option value="id" />
+          <option value="type" />
         </list>
       </option>
     </inspection_tool>

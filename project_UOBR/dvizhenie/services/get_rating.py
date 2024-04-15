@@ -4,36 +4,36 @@ from datetime import timedelta
 from .dop_inf import for_m_e_rating
 
 
-def _get_rating_and_put_into_BD(rig_for_define_next_position: RigPosition, free_pad: Pad) -> None:
+def get_rating_and_put_into_DB(rig_for_define_next_position: RigPosition, free_pad: Pad) -> None:
     """Получает рейтинг для пары кустов и отправляет его в БД"""
 
-    capacity_rating = _get_capacity_rating(rig_for_define_next_position, free_pad)
-    first_stage_date_rating = _get_first_stage_date_rating(rig_for_define_next_position, free_pad)
-    second_stage_date_rating = _get_second_stage_date_rating(rig_for_define_next_position, free_pad)
-    mud_rating = _get_mud_rating(rig_for_define_next_position, free_pad)
-    logistic_rating = _get_logistic_rating(rig_for_define_next_position, free_pad)
-    marker_rating = _get_marker_rating(rig_for_define_next_position, free_pad)
+    rating = get_rating(rig_for_define_next_position, free_pad)
 
-    if (capacity_rating * first_stage_date_rating * second_stage_date_rating * mud_rating * logistic_rating
-            * marker_rating == 0):
-        pass
-
-    else:
-        common_rating = (
-                capacity_rating * 2.5 + first_stage_date_rating * 2.1 + second_stage_date_rating * 0.7 + mud_rating *
-                1.6 + logistic_rating * 3 + marker_rating * 0.1)
-
-        ratings = PositionRating(current_position=rig_for_define_next_position,
-                                 next_position=free_pad,
-                                 capacity_rating=capacity_rating, first_stage_date_rating=first_stage_date_rating,
-                                 second_stage_date_rating=second_stage_date_rating, mud_rating=mud_rating,
-                                 logistic_rating=logistic_rating, marker_rating=marker_rating,
-                                 common_rating=common_rating)
-
-        ratings.save()
+    if type(rating) is PositionRating:
+        rating.save()
 
 
-def _get_capacity_rating(rig_for_define_next_position: RigPosition, free_pad: Pad) -> float:
+def get_rating(rig_for_define_next_position: RigPosition, free_pad: Pad) -> PositionRating:
+    """Получает рейтинг для пары кустов"""
+
+    rating = PositionRating(current_position=rig_for_define_next_position,
+                            next_position=free_pad,
+                            capacity_rating=get_capacity_rating(rig_for_define_next_position, free_pad),
+                            first_stage_date_rating=get_first_stage_date_rating(rig_for_define_next_position, free_pad),
+                            second_stage_date_rating=get_second_stage_date_rating(rig_for_define_next_position,
+                                                                                  free_pad),
+                            mud_rating=get_mud_rating(rig_for_define_next_position, free_pad),
+                            logistic_rating=get_logistic_rating(rig_for_define_next_position, free_pad),
+                            marker_rating=get_marker_rating(rig_for_define_next_position, free_pad))
+
+    if (rating.capacity_rating * rating.first_stage_date_rating * rating.second_stage_date_rating *
+            rating.mud_rating * rating.logistic_rating * rating.marker_rating != 0):
+        rating.common_rating = rating.calculate_common_rating()
+
+        return rating
+
+
+def get_capacity_rating(rig_for_define_next_position: RigPosition, free_pad: Pad) -> float:
     """Получает рейтинг по грузоподъемности для пары кустов"""
 
     rig_capacity = int(rig_for_define_next_position.drilling_rig.capacity())
@@ -67,7 +67,7 @@ def _get_capacity_rating(rig_for_define_next_position: RigPosition, free_pad: Pa
     return capacity_rating
 
 
-def _get_first_stage_date_rating(rig_for_define_next_position: RigPosition, free_pad: Pad) -> float:
+def get_first_stage_date_rating(rig_for_define_next_position: RigPosition, free_pad: Pad) -> float:
     """Получает рейтинг по дате готовности первого этапа для пары кустов"""
 
     end_date = rig_for_define_next_position.end_date
@@ -98,7 +98,7 @@ def _get_first_stage_date_rating(rig_for_define_next_position: RigPosition, free
     return first_stage_date_rating
 
 
-def _get_second_stage_date_rating(rig_for_define_next_position: RigPosition, free_pad: Pad) -> float:
+def get_second_stage_date_rating(rig_for_define_next_position: RigPosition, free_pad: Pad) -> float:
     """Получает рейтинг по дате готовности второго этапа для пары кустов"""
 
     end_date = rig_for_define_next_position.end_date
@@ -126,7 +126,7 @@ def _get_second_stage_date_rating(rig_for_define_next_position: RigPosition, fre
     return second_stage_date_rating
 
 
-def _get_mud_rating(rig_for_define_next_position: RigPosition, free_pad: Pad) -> float:
+def get_mud_rating(rig_for_define_next_position: RigPosition, free_pad: Pad) -> float:
     """Получает рейтинг по типу бурового раствора для пары кустов"""
 
     mud = str(rig_for_define_next_position.drilling_rig.mud)
@@ -152,7 +152,7 @@ def _get_mud_rating(rig_for_define_next_position: RigPosition, free_pad: Pad) ->
     return mud_rating
 
 
-def _get_logistic_rating(rig_for_define_next_position: RigPosition, free_pad: Pad) -> float:
+def get_logistic_rating(rig_for_define_next_position: RigPosition, free_pad: Pad) -> float:
     """Получает рейтинг по логистике для пары кустов"""
 
     rig_field = str(rig_for_define_next_position.pad.field)
@@ -164,11 +164,11 @@ def _get_logistic_rating(rig_for_define_next_position: RigPosition, free_pad: Pa
     return logistic_rating
 
 
-def _get_marker_rating(rig_for_define_next_position: RigPosition, free_pad: Pad) -> float:
+def get_marker_rating(rig_for_define_next_position: RigPosition, free_pad: Pad) -> float:
     """Определяет рейтинг для нетиповых случаев (нестандартная буровая установка, буровой подрядчик - СНПХ,
     приоритетное бурение кустовой площадки"""
 
-    marker_for_drilling_rig = _get_marker_for_drilling_rig(rig_for_define_next_position)
+    marker_for_drilling_rig = get_marker_for_drilling_rig(rig_for_define_next_position)
     marker_for_pad = str(free_pad.marker)
 
     if marker_for_drilling_rig == 'стандартная БУ':
@@ -206,7 +206,7 @@ def _get_marker_rating(rig_for_define_next_position: RigPosition, free_pad: Pad)
     return marker_rating
 
 
-def _get_marker_for_drilling_rig(rig_for_define_next_position: RigPosition) -> str:
+def get_marker_for_drilling_rig(rig_for_define_next_position: RigPosition) -> str:
     """Получает информацию о маркере буровой установки"""
 
     rig_type = str(rig_for_define_next_position.drilling_rig.type)

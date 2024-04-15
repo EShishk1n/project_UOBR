@@ -25,7 +25,7 @@ def _change_next_position(different_next_position: PositionRating):
             next_position=different_next_position.next_position)
     finally:
         NextPosition.objects.filter(current_position=different_next_position.current_position).update(
-            status='Изменено. Требуется подтверждение')
+            status='changed')
 
 
 def get_search_result(pads_id, rigs_id) -> list:
