@@ -4,7 +4,6 @@ from django.db.models import QuerySet
 
 from dvizhenie.models import RigPosition, Pad
 from dvizhenie.services.get_rating import get_rating_and_put_into_DB
-from dvizhenie.services.give_statuses_to_pads.give_status_free_to_pads import get_free_pads
 from dvizhenie.services.give_statuses_to_pads.give_statuses_to_pads import give_statuses_to_pads
 
 
@@ -32,3 +31,7 @@ def calculate_ratings_for_positions_and_put_into_DB(rigs: QuerySet(RigPosition),
     for rig in rigs:
         for pad in pads:
             get_rating_and_put_into_DB(rig, pad)
+
+
+def get_free_pads():
+    return Pad.objects.exclude(status__in=['drilled', 'drilling', 'reserved'])

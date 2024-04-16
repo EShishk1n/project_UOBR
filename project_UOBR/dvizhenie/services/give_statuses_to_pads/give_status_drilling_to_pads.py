@@ -7,13 +7,13 @@ from dvizhenie.services.give_statuses_to_pads.common_function import give_status
 def give_status_drilling_to_pads() -> None:
     """Присваиваем статус 'drilling' всем не отбуренным кустам"""
 
-    drilling_pads_QuerySet = get_drilling_pads()
+    drilling_pads_QuerySet = get_drilling_pads_id()
 
     drilling_pads_list = convert_from_QuerySet_to_list(drilling_pads_QuerySet)
     give_status_to_pads(list_of_pads=drilling_pads_list, status='drilling')
 
 
-def get_drilling_pads() -> QuerySet:
+def get_drilling_pads_id() -> QuerySet:
 
     drilling_pads = RigPosition.objects.exclude(pad__status='drilled').values_list('pad')
 

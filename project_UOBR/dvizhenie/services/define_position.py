@@ -1,8 +1,9 @@
 import datetime
 
-from dvizhenie.models import PositionRating, NextPosition, RigPosition, Pad
+from dvizhenie.models import PositionRating, NextPosition, RigPosition
 from .calculate_all_ratings_and_put_into_DB import calculate_all_ratings_and_put_into_DB
-from .define_rigs_for_definition_next_position import define_sequence_of_rigs_for_definition_positions, form_next_position
+from .define_rigs_for_definition_next_position import define_sequence_of_rigs_for_definition_positions
+from .form_NextPosition import form_next_position
 
 
 def define_position_and_put_into_BD(start_date_for_calculation: datetime.date,
@@ -25,11 +26,6 @@ def define_position_and_put_into_BD(start_date_for_calculation: datetime.date,
             status=result['status'])
         NextPosition.objects.filter(current_position=rig_for_define_next_position.current_position).update(
             next_position=result['next_position'])
-
-
-
-
-
 
 
 def _define_next_position(rig_for_define_next_position: RigPosition) -> dict:
