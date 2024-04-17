@@ -2,7 +2,7 @@ from datetime import datetime
 
 from django.db.models import QuerySet
 
-from dvizhenie.models import RigPosition, Pad
+from dvizhenie.models import RigPosition, Pad, PositionRating
 from dvizhenie.services.get_rating import get_rating_and_put_into_DB
 from dvizhenie.services.give_statuses_to_pads.give_statuses_to_pads import give_statuses_to_pads
 
@@ -28,6 +28,9 @@ def get_rigs_for_calculation_rating(start_date_for_calculation: datetime.date,
 
 
 def calculate_ratings_for_positions_and_put_into_DB(rigs: QuerySet(RigPosition), pads: QuerySet(Pad)) -> None:
+
+    clear_PositionRating()
+
     for rig in rigs:
         for pad in pads:
             get_rating_and_put_into_DB(rig, pad)
@@ -35,3 +38,7 @@ def calculate_ratings_for_positions_and_put_into_DB(rigs: QuerySet(RigPosition),
 
 def get_free_pads():
     return Pad.objects.exclude(status__in=['drilled', 'drilling', 'reserved'])
+
+
+def clear_PositionRating() -> None:
+    PositionRating.objects.all().delete()

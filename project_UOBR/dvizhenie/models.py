@@ -158,6 +158,7 @@ class NextPosition(BaseModel):
 
     class Status(models.TextChoices):
         default = 'default', 'Требуется подтверждение'
+        empty = 'empty', 'Отсутствуют кандидаты'
         commited = 'commited', 'Подтверждено'
         deleted = 'deleted', 'Удалено пользователем'
         changed = 'changed', 'Изменено. Требуется подтверждение'

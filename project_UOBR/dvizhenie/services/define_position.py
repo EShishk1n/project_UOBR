@@ -1,49 +1,68 @@
 import datetime
 
-from dvizhenie.models import PositionRating, NextPosition, RigPosition
+from django.db.models import QuerySet
+
+from dvizhenie.models import PositionRating, NextPosition, RigPosition, Pad
 from .calculate_all_ratings_and_put_into_DB import calculate_all_ratings_and_put_into_DB
-from .define_rigs_for_definition_next_position import define_sequence_of_rigs_for_definition_positions
-from .form_NextPosition import form_next_position
+from .define_sequence_of_objs_in_NextPosition import define_sequence_of_objs_in_NextPosition
+from .form_NextPosition import form_next_position, check_availability_of_obj_in_NextPosition
 
 
-def define_position_and_put_into_BD(start_date_for_calculation: datetime.date,
+def define_position_and_put_into_DB(start_date_for_calculation: datetime.date,
                                     end_date_for_calculation: datetime.date) -> None:
     """Определяет следующую позицию для БУ по максимальному рейтингу и отправляет данные в БД"""
-
-    PositionRating.objects.all().delete()
 
     calculate_all_ratings_and_put_into_DB(start_date_for_calculation,
                                           end_date_for_calculation)
 
     form_next_position(start_date_for_calculation, end_date_for_calculation)
 
-    rigs_for_define_next_position: [list] = define_sequence_of_rigs_for_definition_positions()
+    objs_in_Next_position: [list] = define_sequence_of_objs_in_NextPosition()
 
-    for rig_for_define_next_position in rigs_for_define_next_position:
-        result: [dict] = _define_next_position(rig_for_define_next_position.current_position)
+    for obj in objs_in_Next_position:
+        current_position = obj.current_position
+        result: [dict] = define_next_position(current_position)
 
-        NextPosition.objects.filter(current_position=rig_for_define_next_position.current_position).update(
-            status=result['status'])
-        NextPosition.objects.filter(current_position=rig_for_define_next_position.current_position).update(
-            next_position=result['next_position'])
+        put_result_of_definition_in_NextPosition(current_position, result['next_position'], result['status'])
 
 
-def _define_next_position(rig_for_define_next_position: RigPosition) -> dict:
+def define_next_position(rig_for_define_next_position: RigPosition) -> dict:
     """Определяет следующую позицию для одной буровой установки. Присваивает статус паре"""
 
-    positions = PositionRating.objects.filter(current_position=rig_for_define_next_position, status='').order_by(
-        '-common_rating')
+    positions = get_objs_from_PositionRating(rig_for_define_next_position)
 
     if not positions:
         next_position = None
-        status = 'Отсутствуют кандидаты'
+        status = 'empty'
 
     else:
         next_position = positions.first().next_position
-        status = 'Требуется подтверждение'
-        PositionRating.objects.filter(next_position=next_position).update(status='booked')
+        status = 'default'
+        give_status_booked_to_PositionRating(next_position)
 
-        if next_position.id in NextPosition.objects.all().values('next_position'):
-            _define_next_position(rig_for_define_next_position)
+        if check_availability_of_obj_in_NextPosition(next_position, 'next_position') is True:
+            res = define_next_position(rig_for_define_next_position)
+            next_position = res['next_position']
+            status = res['status']
 
-    return {'next_position': next_position, 'status': status}
+    res = {'next_position': next_position, 'status': status}
+
+    return res
+
+
+def get_objs_from_PositionRating(current_position: RigPosition) -> QuerySet(PositionRating):
+
+    objs_from_PositionRating = PositionRating.objects.filter(current_position=current_position, status='').order_by(
+        '-common_rating')
+
+    return objs_from_PositionRating
+
+
+def give_status_booked_to_PositionRating(booked_next_position: Pad) -> None:
+
+    PositionRating.objects.filter(next_position=booked_next_position).update(status='booked')
+
+
+def put_result_of_definition_in_NextPosition(current_position: RigPosition, next_position: Pad, status: str) -> None:
+
+    NextPosition.objects.filter(current_position=current_position).update(status=status, next_position=next_position)

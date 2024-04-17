@@ -5,12 +5,12 @@ from django.test import TestCase
 from dvizhenie.models import Pad, type_of_DR, Contractor, DrillingRig, RigPosition, NextPosition
 from dvizhenie.services.give_statuses_to_pads.common_function import give_status_to_pads
 from dvizhenie.services.give_statuses_to_pads.give_status_drilled_to_pads import get_drilled_pads, \
-    give_status_drilled_to_pads, get_all_rigs_list, get_dislocated_rigs_list
-from dvizhenie.services.give_statuses_to_pads.give_status_drilling_to_pads import get_drilling_pads, \
-    give_status_drilling_to_pads, convert_from_QuerySet_to_list
-from dvizhenie.services.give_statuses_to_pads.give_status_free_to_pads import get_free_pads, give_status_free_to_pads
-from dvizhenie.services.give_statuses_to_pads.give_status_reserved_to_pads import get_reserved_pads, \
-    give_status_reserved_to_pads
+    give_status_drilled_to_pads, get_dislocated_rigs_list, get_all_rigs_id_list
+from dvizhenie.services.give_statuses_to_pads.give_status_drilling_to_pads import \
+    give_status_drilling_to_pads, convert_from_QuerySet_to_list, get_drilling_pads_id
+from dvizhenie.services.give_statuses_to_pads.give_status_free_to_pads import give_status_free_to_pads, get_free_pads_id
+from dvizhenie.services.give_statuses_to_pads.give_status_reserved_to_pads import \
+    give_status_reserved_to_pads, get_reserved_pads_id
 from dvizhenie.services.give_statuses_to_pads.give_statuses_to_pads import give_statuses_to_pads
 
 
@@ -64,8 +64,8 @@ class GiveStatusDrilledToPadsTestCase(TestCase):
                                                          start_date=date(2024, 5, 1), end_date=date(2024, 10, 1))
 
     def test_get_all_rigs_list(self):
-        all_rigs_list = get_all_rigs_list()
-        self.assertEquals(all_rigs_list, {1: 2})
+        all_rigs_list = get_all_rigs_id_list()
+        self.assertEquals(all_rigs_list, {DrillingRig.objects.get(number=666).id: 2})
 
     def test_get_dislocated_rigs_list(self):
         dislocated_rigs_list = get_dislocated_rigs_list()
@@ -105,7 +105,7 @@ class GiveStatusDrillingToPadsTestCase(TestCase):
                                                          start_date=date(2024, 5, 1), end_date=date(2024, 10, 1))
 
     def test_get_drilling_pads(self):
-        drilling_pads = get_drilling_pads()
+        drilling_pads = get_drilling_pads_id()
         self.assertEquals(drilling_pads[0][0], Pad.objects.get(number=110).id)
 
     def test_give_status_drilling_to_pads(self):
@@ -137,7 +137,7 @@ class GiveStatusReservedToPadsTestCase(TestCase):
                                                            next_position=self.pad_2, status='changed')
 
     def test_get_reserved_pads(self):
-        reserved_pads = get_reserved_pads()
+        reserved_pads = get_reserved_pads_id()
         self.assertEquals(reserved_pads[0][0], Pad.objects.get(number=110).id)
 
     def test_give_status_reserved_to_pads(self):
@@ -171,7 +171,7 @@ class GiveStatusFreeToPadsTestCase(TestCase):
                                         nns_quantity=24, status='')
 
     def test_get_free_pads(self):
-        free_pads = get_free_pads()
+        free_pads = get_free_pads_id()
         self.assertEquals(free_pads[0][0], Pad.objects.get(number=110).id)
         self.assertEquals(len(free_pads), 2)
 

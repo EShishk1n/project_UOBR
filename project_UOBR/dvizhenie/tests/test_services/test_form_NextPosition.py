@@ -3,8 +3,8 @@ from datetime import date
 from django.test import TestCase
 
 from dvizhenie.models import Pad, type_of_DR, Contractor, DrillingRig, RigPosition, NextPosition
-from dvizhenie.services.form_NextPosition import put_rigs_for_define_in_NextPosition, \
-    check_availability_of_rig_in_NextPosition, get_rigs_for_put_into_DB, form_next_position
+from dvizhenie.services.form_NextPosition import put_rigs_for_define_in_NextPosition, get_rigs_for_put_into_DB, \
+    form_next_position, check_availability_of_obj_in_NextPosition
 
 
 class FormNextPositionTestCase(TestCase):
@@ -46,10 +46,9 @@ class FormNextPositionTestCase(TestCase):
         self.next_position = NextPosition.objects.create(current_position=self.rig_position_2, next_position=self.pad_3,
                                                          status='')
 
-    def test_check_availability_of_rig_in_NextPosition(self):
-
-        res = check_availability_of_rig_in_NextPosition(self.rig_position_1)
-        res1 = check_availability_of_rig_in_NextPosition(self.rig_position_2)
+    def test_check_availability_of_obj_in_NextPosition(self):
+        res = check_availability_of_obj_in_NextPosition(self.rig_position_1, 'current_position')
+        res1 = check_availability_of_obj_in_NextPosition(self.rig_position_2, 'current_position')
         self.assertEquals(res, False)
         self.assertEquals(res1, True)
 

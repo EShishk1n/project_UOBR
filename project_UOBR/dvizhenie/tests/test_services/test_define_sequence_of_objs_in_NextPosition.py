@@ -2,12 +2,12 @@ from datetime import date
 
 from django.test import TestCase
 
-from dvizhenie.models import RigPosition, DrillingRig, Contractor, type_of_DR, Pad, PositionRating
-from dvizhenie.services.calculate_all_ratings_and_put_into_DB import calculate_ratings_for_positions_and_put_into_DB, \
-    get_rigs_for_calculation_rating, calculate_all_ratings_and_put_into_DB, get_free_pads, clear_PositionRating
+from dvizhenie.models import type_of_DR, Contractor, DrillingRig, RigPosition, Pad, NextPosition
+from dvizhenie.services.define_sequence_of_objs_in_NextPosition import define_sequence, get_objs_from_NextPosition, \
+    define_sequence_of_objs_in_NextPosition
 
 
-class CalculateAllRatingsAndPutIntoDBTestCase(TestCase):
+class DefineSequenceOfObjsInNextPositionBTestCase(TestCase):
     def setUp(self):
         self.pad_1 = Pad.objects.create(number='133', field='САЛ',
                                         first_stage_date=date(2023, 12, 20),
@@ -59,48 +59,48 @@ class CalculateAllRatingsAndPutIntoDBTestCase(TestCase):
                                          second_stage_date=date(2024, 4, 10),
                                          required_capacity=200, required_mud='РВО', gs_quantity=0,
                                          nns_quantity=8, status='', marker='СНПХ')
-        self.type_of_DR = type_of_DR.objects.create(type='5000/320')
-        self.contractor = Contractor.objects.create(contractor='НФ РНБ')
-        self.drilling_rig_1 = DrillingRig.objects.create(type=self.type_of_DR, number=666, contractor=self.contractor,
+
+        self.type_of_DR_1 = type_of_DR.objects.create(type='5000/320')
+        self.contractor_1 = Contractor.objects.create(contractor='НФ РНБ')
+        self.drilling_rig_1 = DrillingRig.objects.create(type=self.type_of_DR_1, number=666,
+                                                         contractor=self.contractor_1,
                                                          mud='РВО')
         self.rig_position_1 = RigPosition.objects.create(drilling_rig=self.drilling_rig_1, pad=self.pad_1,
                                                          start_date=date(2023, 2, 10), end_date=date(2024, 3, 1))
-        self.contractor2 = Contractor.objects.create(contractor='СНПХ')
-        self.drilling_rig_2 = DrillingRig.objects.create(type=self.type_of_DR, number=777, contractor=self.contractor2,
+        self.next_position_1 = NextPosition.objects.create(current_position=self.rig_position_1, next_position=None,
+                                                           status='default')
+
+        self.contractor_2 = Contractor.objects.create(contractor='СНПХ')
+        self.drilling_rig_2 = DrillingRig.objects.create(type=self.type_of_DR_1, number=777,
+                                                         contractor=self.contractor_2,
                                                          mud='РВО')
         self.rig_position_2 = RigPosition.objects.create(drilling_rig=self.drilling_rig_2, pad=self.pad_2,
                                                          start_date=date(2023, 2, 10), end_date=date(2024, 3, 1))
+        self.next_position_2 = NextPosition.objects.create(current_position=self.rig_position_2, next_position=None,
+                                                           status='default')
 
-    def test_get_free_pads(self):
-        free_pads = get_free_pads()
-        self.assertEquals(len(free_pads), 8)
+        self.type_of_DR_3 = type_of_DR.objects.create(type='2900/200')
+        self.contractor_3 = Contractor.objects.create(contractor='НФ РНБ')
+        self.drilling_rig_3 = DrillingRig.objects.create(type=self.type_of_DR_3, number=888,
+                                                         contractor=self.contractor_3,
+                                                         mud='РВО')
+        self.rig_position_3 = RigPosition.objects.create(drilling_rig=self.drilling_rig_3, pad=self.pad_7,
+                                                         start_date=date(2023, 2, 10), end_date=date(2024, 3, 1))
+        self.next_position_3 = NextPosition.objects.create(current_position=self.rig_position_3, next_position=None,
+                                                           status='changed')
 
-    def test_calculate_ratings_for_positions_and_put_into_DB(self):
-        free_pads = Pad.objects.all()
-        rigs = RigPosition.objects.all()
-        calculate_ratings_for_positions_and_put_into_DB(rigs, free_pads)
-        self.assertEquals(len(PositionRating.objects.all()), 10)
+    def test_define_sequence(self):
 
-    def test_clear_PositionRating(self):
-        free_pads = Pad.objects.all()
-        rigs = RigPosition.objects.all()
-        calculate_ratings_for_positions_and_put_into_DB(rigs, free_pads)
+        objs_in_NextPosition = NextPosition.objects.all()
+        sequence = define_sequence(objs_in_NextPosition)
+        self.assertEquals(sequence, [self.next_position_3, self.next_position_2, self.next_position_1])
 
-        self.assertEquals(len(PositionRating.objects.all()), 10)
-        clear_PositionRating()
-        self.assertEquals(len(PositionRating.objects.all()), 0)
+    def test_get_objs_from_NextPosition(self):
 
-    def test_get_rigs_for_calculation_rating(self):
-        start_date_for_calculation = date(2024, 2, 29)
-        end_date_for_calculation = date(2024, 3, 2)
-        rigs_for_calculation_rating = get_rigs_for_calculation_rating(start_date_for_calculation,
-                                                                      end_date_for_calculation)
+        objs_from_NextPositions = get_objs_from_NextPosition()
+        self.assertEquals(len(objs_from_NextPositions), 2)
 
-        self.assertEquals(len(rigs_for_calculation_rating), 2)
+    def test_define_sequence_of_objs_in_NextPosition(self):
 
-    def test_calculate_all_ratings_and_put_into_DB(self):
-        start_date_for_calculation = date(2024, 2, 29)
-        end_date_for_calculation = date(2024, 3, 2)
-        calculate_all_ratings_and_put_into_DB(start_date_for_calculation, end_date_for_calculation)
-
-        self.assertEquals(len(PositionRating.objects.all()), 8)
+        sequence_of_objs_in_NextPosition = define_sequence_of_objs_in_NextPosition()
+        self.assertEquals(sequence_of_objs_in_NextPosition, [self.next_position_2, self.next_position_1])
