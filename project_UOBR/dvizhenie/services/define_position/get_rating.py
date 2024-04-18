@@ -1,7 +1,7 @@
 from dvizhenie.models import RigPosition, Pad, PositionRating
 
 from datetime import timedelta
-from .dop_inf import for_m_e_rating
+from .dop_inf import rating_of_moving_between_fields
 
 
 def get_rating_and_put_into_DB(rig_for_define_next_position: RigPosition, free_pad: Pad) -> None:
@@ -159,7 +159,7 @@ def get_logistic_rating(rig_for_define_next_position: RigPosition, free_pad: Pad
     pad_field = str(free_pad.field)
 
     combination_for_geting_rating = rig_field + pad_field
-    logistic_rating = for_m_e_rating[combination_for_geting_rating]
+    logistic_rating = rating_of_moving_between_fields[combination_for_geting_rating]
 
     return logistic_rating
 

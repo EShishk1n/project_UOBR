@@ -4,7 +4,7 @@ from types import NoneType
 from django.test import TestCase
 
 from dvizhenie.models import Pad, type_of_DR, Contractor, DrillingRig, RigPosition, PositionRating
-from dvizhenie.services.get_rating import get_capacity_rating, get_first_stage_date_rating, \
+from dvizhenie.services.define_position.get_rating import get_capacity_rating, get_first_stage_date_rating, \
     get_second_stage_date_rating, get_mud_rating, get_logistic_rating, get_marker_for_drilling_rig, get_marker_rating, \
     get_rating, get_rating_and_put_into_DB
 

@@ -1,14 +1,12 @@
-from datetime import date, datetime
+from datetime import date
 from django.test import TestCase
 
 from dvizhenie.models import Pad, type_of_DR, Contractor, DrillingRig, RigPosition, NextPosition, PositionRating
-from dvizhenie.services.data_putter import put_rigs_position_data, put_pads_data
-from dvizhenie.services.data_taker import open_work_sheet, take_rigs_position_data, take_pads_data, \
+from dvizhenie.services.load_data_to_excel.data_putter import put_rigs_position_data, put_pads_data
+from dvizhenie.services.load_data_to_excel.take_file_creation_data import open_work_sheet, take_rigs_position_data, take_pads_data, \
     take_file_cration_data
-from dvizhenie.services.define_position import calculate_all_ratings_and_put_into_BD, _define_next_position, \
+from dvizhenie.services.define_position import _define_next_position, \
     define_position_and_put_into_BD
-
-from dvizhenie.services.give_statuses_to_pads import give_statuses_to_pads
 
 
 class DataTakerTestCase(TestCase):

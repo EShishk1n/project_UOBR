@@ -1,5 +1,3 @@
-import time
-
 from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db import IntegrityError, transaction
@@ -13,10 +11,7 @@ from django.utils.translation import gettext as _
 from .forms import DrillingRigForm, PadForm, RigPositionForm, UploadFileForm, ExportDataForm, DefinePositionForm, \
     RigPositionAddForm
 from .models import DrillingRig, Pad, RigPosition, NextPosition, PositionRating
-from .services.data_putter import put_rigs_position_data, put_pads_data
-from .services.data_taker import take_file_cration_data
-from .services.define_position import define_position_and_put_into_DB
-from .services.give_statuses_to_pads import give_statuses_to_pads
+
 from .services.func_for_view import handle_uploaded_file, _change_next_position, get_search_result
 
 

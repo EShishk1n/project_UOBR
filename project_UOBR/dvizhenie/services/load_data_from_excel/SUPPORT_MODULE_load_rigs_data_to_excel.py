@@ -5,7 +5,7 @@ from openpyxl.reader.excel import load_workbook
 from dvizhenie.models import DrillingRig, type_of_DR, Contractor, Pad, RigPosition
 
 
-def open_work_sheet():
+def open_work_sheet_Razmery():
     """Открывает файл. Нужна для искючения ошибки при запуске сайта при отсутствии файла в папке"""
 
     wb = load_workbook(filename='dvizhenie/uploads/Размеры_БУ.xlsx')
@@ -16,7 +16,7 @@ def open_work_sheet():
 def take_rigs_data(table_start_row: str, table_end_row: str) -> list:
     """Имортирует данные по окончанию бурения для каждой БУ из файла 'Движение_БУ'"""
 
-    sheet = open_work_sheet()
+    sheet = open_work_sheet_Razmery()
 
     min_row = table_start_row
     max_row = table_end_row
@@ -53,7 +53,7 @@ def put_rigs_data(table_start_row: str, table_end_row: str):
 def take_rigs_positions_data(table_start_row: str, table_end_row: str) -> list:
     """Имортирует данные по окончанию бурения для каждой БУ из файла 'Движение_БУ'"""
 
-    sheet = open_work_sheet()
+    sheet = open_work_sheet_Razmery()
 
     min_row = table_start_row
     max_row = table_end_row

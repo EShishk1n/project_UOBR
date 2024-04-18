@@ -3,7 +3,7 @@ from datetime import date
 from django.test import TestCase
 
 from dvizhenie.models import Pad, type_of_DR, Contractor, DrillingRig, RigPosition, NextPosition
-from dvizhenie.services.form_NextPosition import put_rigs_for_define_in_NextPosition, get_rigs_for_put_into_DB, \
+from dvizhenie.services.define_position.form_NextPosition import put_rigs_for_define_in_NextPosition, get_rigs_for_put_into_DB, \
     form_next_position, check_availability_of_obj_in_NextPosition
 
 

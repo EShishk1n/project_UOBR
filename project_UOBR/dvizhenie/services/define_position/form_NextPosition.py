@@ -1,9 +1,7 @@
-from itertools import islice
-
 from django.db.models import QuerySet
 
 from dvizhenie.models import NextPosition, RigPosition, BaseModel
-from dvizhenie.services.calculate_all_ratings_and_put_into_DB import get_rigs_for_calculation_rating
+from dvizhenie.services.define_position.calculate_all_ratings_and_put_into_DB import get_rigs_for_calculation_rating
 
 
 def form_next_position(start_date_for_calculation, end_date_for_calculation) -> None:

@@ -2,14 +2,12 @@ from datetime import date
 
 from django.test import TestCase
 
-from dvizhenie.models import type_of_DR, Contractor, DrillingRig, RigPosition, Pad, NextPosition, PositionRating
-from dvizhenie.services.define_position import put_result_of_definition_in_NextPosition, \
-    give_status_booked_to_PositionRating, get_objs_from_PositionRating, define_next_position
-from dvizhenie.services.define_sequence_of_objs_in_NextPosition import define_sequence, get_objs_from_NextPosition, \
+from dvizhenie.models import type_of_DR, Contractor, DrillingRig, RigPosition, Pad, NextPosition
+from dvizhenie.services.define_position.define_sequence_of_objs_in_NextPosition import define_sequence, get_objs_from_NextPosition, \
     define_sequence_of_objs_in_NextPosition
 
 
-class DefinePositionTestCase(TestCase):
+class DefineSequenceOfObjsInNextPositionBTestCase(TestCase):
     def setUp(self):
         self.pad_1 = Pad.objects.create(number='133', field='САЛ',
                                         first_stage_date=date(2023, 12, 20),
@@ -78,8 +76,7 @@ class DefinePositionTestCase(TestCase):
                                                          mud='РВО')
         self.rig_position_2 = RigPosition.objects.create(drilling_rig=self.drilling_rig_2, pad=self.pad_2,
                                                          start_date=date(2023, 2, 10), end_date=date(2024, 3, 1))
-        self.next_position_2 = NextPosition.objects.create(current_position=self.rig_position_2,
-                                                           next_position=self.pad_5,
+        self.next_position_2 = NextPosition.objects.create(current_position=self.rig_position_2, next_position=None,
                                                            status='default')
 
         self.type_of_DR_3 = type_of_DR.objects.create(type='2900/200')
@@ -90,56 +87,20 @@ class DefinePositionTestCase(TestCase):
         self.rig_position_3 = RigPosition.objects.create(drilling_rig=self.drilling_rig_3, pad=self.pad_7,
                                                          start_date=date(2023, 2, 10), end_date=date(2024, 3, 1))
         self.next_position_3 = NextPosition.objects.create(current_position=self.rig_position_3, next_position=None,
-                                                           status='')
-        self.position_rating_3_1 = PositionRating.objects.create(current_position=self.rig_position_3,
-                                                                 next_position=self.pad_10,
-                                                                 capacity_rating=6,
-                                                                 first_stage_date_rating=5,
-                                                                 second_stage_date_rating=5,
-                                                                 mud_rating=6,
-                                                                 logistic_rating=4,
-                                                                 marker_rating=7,
-                                                                 common_rating=55,
-                                                                 status='')
-        self.position_rating_3_2 = PositionRating.objects.create(current_position=self.rig_position_3,
-                                                                 next_position=self.pad_5,
-                                                                 capacity_rating=6,
-                                                                 first_stage_date_rating=5,
-                                                                 second_stage_date_rating=5,
-                                                                 mud_rating=6,
-                                                                 logistic_rating=4,
-                                                                 marker_rating=7,
-                                                                 common_rating=80,
-                                                                 status='')
+                                                           status='changed')
 
-    def test_put_result_of_definition_in_NextPosition(self):
-        self.assertEquals(self.next_position_3.next_position, None)
+    def test_define_sequence(self):
 
-        put_result_of_definition_in_NextPosition(self.rig_position_3, self.pad_7, 'default')
+        objs_in_NextPosition = NextPosition.objects.all()
+        sequence = define_sequence(objs_in_NextPosition)
+        self.assertEquals(sequence, [self.next_position_3, self.next_position_2, self.next_position_1])
 
-        self.assertEquals(NextPosition.objects.get(current_position=self.rig_position_3).next_position, self.pad_7)
-        self.assertEquals(NextPosition.objects.get(current_position=self.rig_position_3).status, 'default')
+    def test_get_objs_from_NextPosition(self):
 
-    def test_give_status_booked_to_PositionRating(self):
-        give_status_booked_to_PositionRating(self.pad_10)
+        objs_from_NextPositions = get_objs_from_NextPosition()
+        self.assertEquals(len(objs_from_NextPositions), 2)
 
-        self.assertEquals(PositionRating.objects.get(next_position=self.pad_10).status, 'booked')
+    def test_define_sequence_of_objs_in_NextPosition(self):
 
-    def test_get_objs_from_PositionRating(self):
-        objs_from_PositionRating = get_objs_from_PositionRating(self.rig_position_3)
-
-        self.assertEquals(objs_from_PositionRating[0], self.position_rating_3_2)
-        self.assertEquals(objs_from_PositionRating[1], self.position_rating_3_1)
-
-    def test_define_next_position(self):
-
-        res = define_next_position(self.rig_position_3)
-        res1 = define_next_position(self.rig_position_2)
-
-        self.assertEquals(res['next_position'], self.pad_10)
-        self.assertEquals(res['status'], 'default')
-
-        self.assertEquals(res1['next_position'], None)
-
-    def test_define_position_and_put_into_DB(self):
-        pass
+        sequence_of_objs_in_NextPosition = define_sequence_of_objs_in_NextPosition()
+        self.assertEquals(sequence_of_objs_in_NextPosition, [self.next_position_2, self.next_position_1])

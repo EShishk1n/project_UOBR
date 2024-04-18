@@ -3,7 +3,7 @@ from datetime import datetime
 from django.db.models import QuerySet
 
 from dvizhenie.models import RigPosition, Pad, PositionRating
-from dvizhenie.services.get_rating import get_rating_and_put_into_DB
+from dvizhenie.services.define_position.get_rating import get_rating_and_put_into_DB
 from dvizhenie.services.give_statuses_to_pads.give_statuses_to_pads import give_statuses_to_pads
 
 
