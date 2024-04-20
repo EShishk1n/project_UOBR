@@ -461,7 +461,7 @@ def upload_file(request):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             if str(request.FILES['file'])[-5:] == '.xlsx':
-                handle_uploaded_file(request.FILES["file"], "dvizhenie/uploads/Движение_БУ.xlsx")
+                handle_uploaded_file(request.FILES["file"])
                 return redirect(request.session['return_path'])
             else:
                 return render(request, "dvizhenie/upload_file.html",

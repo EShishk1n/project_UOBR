@@ -1,9 +1,6 @@
-def handle_uploaded_file(f, path: str):
+def handle_uploaded_file(f):
     """Загружает файл на сервер"""
 
-    with open(path, "wb+") as destination:
-        print(destination)
-        print(f.chunks)
+    with open("dvizhenie/uploads/Движение_БУ.xlsx", "wb+") as destination:
         for chunk in f.chunks():
-            print(chunk)
             destination.write(chunk)
