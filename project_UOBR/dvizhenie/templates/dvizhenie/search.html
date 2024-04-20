@@ -24,7 +24,7 @@
                 </tr>
                 </thead>
                 <tbody class="table-group-divider">
-                {% for pad in result.0 %}
+                {% for pad in result['result_pads'] %}
                 <tr>
                     <th scope="row">{{pad.0.0.number}}</th>
                     <td>{{pad.0.0.field}}</td>
@@ -55,7 +55,7 @@
                 </tr>
                 </thead>
                 <tbody class="table-group-divider">
-                {% for rig in result.1 %}
+                {% for rig in result['result_rigs'] %}
                 <tr>
                     <th scope="row">{{rig.0.0.number}}</th>
                     <td>{{rig.0.0.type}}</td>
@@ -85,24 +85,20 @@
                 </tr>
                 </thead>
                 <tbody class="table-group-divider">
-                {% for res in result %}
-                {% for rig_position in res %}
+                {% for rig_position in result['rig_position'] %}
                 <tr>
-                    {% if rig_position.1 %}
-                    <td>{{rig_position.1.0.drilling_rig.type}}</td>
-                    <td>{{rig_position.1.0.drilling_rig.number}}</td>
-                    <td>{{rig_position.1.0.drilling_rig.contractor}}</td>
-                    <td>{{rig_position.1.0.pad.number}}</td>
-                    <td>{{rig_position.1.0.pad.field}}</td>
-                    <th scope="col">{{rig_position.1.0.start_date|date:"d.m.Y"}}</th>
-                    <th scope="col">{{rig_position.1.0.end_date|date:"d.m.Y"}}</th>
-                    {% endif %}
+                    <td>{{rig_position.0.0.drilling_rig.type}}</td>
+                    <td>{{rig_position.0.0.drilling_rig.number}}</td>
+                    <td>{{rig_position.0.0.drilling_rig.contractor}}</td>
+                    <td>{{rig_position.0.0.pad.number}}</td>
+                    <td>{{rig_position.0.0.pad.field}}</td>
+                    <th scope="col">{{rig_position.0.0.start_date|date:"d.m.Y"}}</th>
+                    <th scope="col">{{rig_position.0.0.end_date|date:"d.m.Y"}}</th>
                 </tr>
-                {% endfor %}
                 {% endfor %}
                 </tbody>
             </table>
         </div>
-
     </div>
-    {% endblock %}
+</div>
+{% endblock %}

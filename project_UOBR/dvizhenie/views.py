@@ -12,7 +12,7 @@ from .forms import DrillingRigForm, PadForm, RigPositionForm, UploadFileForm, Ex
     RigPositionAddForm
 from .models import DrillingRig, Pad, RigPosition, NextPosition, PositionRating
 
-from .services.func_for_view import handle_uploaded_file, _change_next_position, get_search_result
+from dvizhenie.services.funcs_for_views.handle_upload_file import handle_uploaded_file
 
 
 def start_page(request):
@@ -369,7 +369,7 @@ class Search(LoginRequiredMixin, ListView):
         return {'pad': Pad.objects.filter(number__contains=self.request.GET.get('q')).values_list('id'),
                 'rig': DrillingRig.objects.filter(number__contains=self.request.GET.get('q')).values_list('id')}
 
-    def get_queryset(self) -> list:
+    def get_queryset(self) -> dict:
         pads_id = self.get_id()['pad']
         rigs_id = self.get_id()['rig']
         result = get_search_result(pads_id, rigs_id)
@@ -461,7 +461,7 @@ def upload_file(request):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             if str(request.FILES['file'])[-5:] == '.xlsx':
-                handle_uploaded_file(request.FILES["file"])
+                handle_uploaded_file(request.FILES["file"], "dvizhenie/uploads/Движение_БУ.xlsx")
                 return redirect(request.session['return_path'])
             else:
                 return render(request, "dvizhenie/upload_file.html",
