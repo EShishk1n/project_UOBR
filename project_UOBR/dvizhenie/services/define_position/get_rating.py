@@ -8,7 +8,6 @@ def get_rating_and_put_into_DB(rig_for_define_next_position: RigPosition, free_p
     """Получает рейтинг для пары кустов и отправляет его в БД"""
 
     rating = get_rating(rig_for_define_next_position, free_pad)
-
     if type(rating) is PositionRating:
         rating.save()
 
@@ -25,6 +24,8 @@ def get_rating(rig_for_define_next_position: RigPosition, free_pad: Pad) -> Posi
                             mud_rating=get_mud_rating(rig_for_define_next_position, free_pad),
                             logistic_rating=get_logistic_rating(rig_for_define_next_position, free_pad),
                             marker_rating=get_marker_rating(rig_for_define_next_position, free_pad))
+
+    # print(rating.capacity_rating, rating.first_stage_date_rating, rating.second_stage_date_rating, rating.marker_rating)
 
     if (rating.capacity_rating * rating.first_stage_date_rating * rating.second_stage_date_rating *
             rating.mud_rating * rating.logistic_rating * rating.marker_rating != 0):

@@ -7,7 +7,7 @@ from dvizhenie.services.define_position.calculate_all_ratings_and_put_into_DB im
 def form_next_position(start_date_for_calculation, end_date_for_calculation) -> None:
     """Формирует данные в модели NextPosition"""
 
-    status_to_exclude = ['Подтверждено', 'Изменено. Требуется подтверждение', 'Удалено пользователем']
+    status_to_exclude = ['commited', 'changed', 'deleted']
     NextPosition.objects.exclude(status__in=status_to_exclude).delete()
 
     put_rigs_for_define_in_NextPosition(start_date_for_calculation, end_date_for_calculation)

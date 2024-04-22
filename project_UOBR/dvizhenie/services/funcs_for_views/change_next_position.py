@@ -2,7 +2,7 @@ from dvizhenie.models import PositionRating, Pad, NextPosition, RigPosition
 from dvizhenie.services.give_statuses_to_pads.common_function import give_status_to_pads
 
 
-def change_next_position(different_next_position: PositionRating):
+def _change_next_position(different_next_position: PositionRating):
     """Меняет автоматически полученную следующую позицию на выбранную"""
 
     current_position = different_next_position.current_position
