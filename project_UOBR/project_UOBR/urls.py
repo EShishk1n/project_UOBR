@@ -12,7 +12,7 @@ urlpatterns += [
 ]
 
 urlpatterns += [
-    path('start', StaticPagesViews.start_page, name='start_page'),
+    path('', StaticPagesViews.start_page, name='start_page'),
     path('about_app', StaticPagesViews.about_app, name='about_app'),
     path('contacts', StaticPagesViews.contacts, name='contacts')
 ]

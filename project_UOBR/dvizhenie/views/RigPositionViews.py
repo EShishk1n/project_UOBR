@@ -42,7 +42,7 @@ class RigPositionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateV
     model = RigPosition
     form_class = RigPositionForm
     context_object_name = 'rig_position'
-    template_name = 'dvizhenie/RigPositionsView_templates/update_rig_position.html'
+    template_name = 'dvizhenie/RigPositionViews_templates/update_rig_position.html'
     pk_url_kwarg = 'pk'
     success_url = reverse_lazy('rig_position')
     permission_required = 'dvizhenie.change_rigposition'
@@ -55,5 +55,5 @@ class RigPositionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteV
     pk_url_kwarg = 'pk'
     context_object_name = 'rig_position'
     success_url = reverse_lazy('rig_position')
-    template_name = 'dvizhenie/RigPositionsView_templates/delete_rig_position.html'
+    template_name = 'dvizhenie/RigPositionViews_templates/delete_rig_position.html'
     permission_required = 'dvizhenie.delete_rigposition'
