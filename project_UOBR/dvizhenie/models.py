@@ -188,9 +188,9 @@ class PositionRating(BaseModel):
     def calculate_common_rating(self) -> float:
 
         common_rating: float = (
-                self.capacity_rating * 2.5 + self.first_stage_date_rating * 2.1 +
-                self.second_stage_date_rating * 0.7 + self.mud_rating * 1.6
-                + self.logistic_rating * 3 + self.marker_rating * 0.1)
+                float(self.capacity_rating) * 2.5 + float(self.first_stage_date_rating) * 2.1 +
+                float(self.second_stage_date_rating) * 0.7 + float(self.mud_rating) * 1.6
+                + float(self.logistic_rating) * 3 + float(self.marker_rating) * 0.1)
 
         return common_rating
 

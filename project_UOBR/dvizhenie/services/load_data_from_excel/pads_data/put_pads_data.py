@@ -3,10 +3,10 @@ from dvizhenie.services.define_position.dop_inf import fields
 from dvizhenie.services.load_data_from_excel.pads_data.take_pads_data import take_pads_data_from_table
 
 
-def put_pads_data(table_start_row: int, table_end_row: int):
+def put_pads_data(table_start_row: int, table_end_row: int, path: str):
     """Вставляет данные, полученные из таблицы в модель Pad"""
 
-    pads_data = take_pads_data_from_table(table_start_row=table_start_row, table_end_row=table_end_row)
+    pads_data = take_pads_data_from_table(table_start_row=table_start_row, table_end_row=table_end_row, path=path)
 
     for pad_data in pads_data:
         pad_already_in_Pad = Pad.objects.filter(number=pad_data['number'], field=pad_data['field'])

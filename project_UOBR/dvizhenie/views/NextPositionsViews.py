@@ -111,7 +111,7 @@ def change_next_position(request, pk):
     'Изменено. Требуется подтверждение'"""
 
     if request.method == 'GET':
-        _change_next_position(different_next_position=PositionRating.objects.filter(id=pk))
+        _change_next_position(different_next_position=PositionRating.objects.get(id=pk))
 
         define_next_position_after_changes()
 
@@ -151,7 +151,7 @@ def reset_all_changes(request):
 class CommitedNextPositionView(LoginRequiredMixin, ListView):
     """Отображает, подтвержденные специалистом, экземплры модели NextPosition"""
 
-    template_name = 'dvizhenie/commited_next_position.html'
+    template_name = 'dvizhenie/NextPositionsViews_templates/commited_next_position.html'
     context_object_name = 'next_positions'
     queryset = NextPosition.objects.filter(status='commited').order_by('current_position__end_date').select_related(
         'next_position').select_related(
@@ -166,7 +166,7 @@ def delete_commited_position(request, pk):
     """Меняет статус подтвержденной пары на 'Требуется подтверждение'"""
 
     if request.method == 'GET':
-        update_NextPosition(next_position_queryset=NextPosition.objects.filter(id=pk), status='default',
+        update_NextPosition(next_position_queryset=NextPosition.objects.filter(id=pk), status='deleted',
                             reset_next_position=True)
 
         give_status_free_to_pads()
@@ -182,11 +182,11 @@ def commit_commited_position(request, pk):
 
     if request.method == 'GET':
 
-        next_position = NextPosition.objects.filter(id=pk)
+        next_position = NextPosition.objects.get(id=pk)
         update_NextPosition(next_position_queryset=NextPosition.objects.filter(id=pk), delete_next_position=True)
 
-        drilling_rig = next_position[0].current_position.drilling_rig
-        pad = next_position[0].next_position
+        drilling_rig = next_position.current_position.drilling_rig
+        pad = next_position.next_position
         RigPosition(drilling_rig=drilling_rig, pad=pad).save()
 
     return redirect('commited_next_position')

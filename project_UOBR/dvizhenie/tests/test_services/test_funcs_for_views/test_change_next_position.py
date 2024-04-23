@@ -4,7 +4,7 @@ from django.test import TestCase
 
 from dvizhenie.models import NextPosition, RigPosition, DrillingRig, Contractor, type_of_DR, Pad, PositionRating
 from dvizhenie.services.funcs_for_views.change_next_position import put_new_next_position_in_NextPosition, \
-    delete_next_position_if_alredy_in_model, give_status_free_to_pad_in_previous_NextPosition, change_next_position
+    delete_next_position_if_alredy_in_model, give_status_free_to_pad_in_previous_NextPosition, _change_next_position
 
 
 class ChangeNextPositionTestCase(TestCase):
@@ -60,7 +60,7 @@ class ChangeNextPositionTestCase(TestCase):
         self.assertEquals(Pad.objects.get(number='110').status, 'free')
 
     def test_change_next_position(self):
-        change_next_position(self.position_rating)
+        _change_next_position(self.position_rating)
 
         self.assertEquals(Pad.objects.get(number='110').status, 'free')
         self.assertEquals(NextPosition.objects.all()[0].next_position, self.pad_3)

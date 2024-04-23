@@ -19,7 +19,6 @@ class TakePadsDataTestCase(TestCase):
         self.table_end_row = 9
 
     def test_take_marker_data_from_row(self):
-
         marker_data_1 = take_marker_data_from_row(self.row_1)
         marker_data_2 = take_marker_data_from_row(self.row_2)
 
@@ -27,15 +26,15 @@ class TakePadsDataTestCase(TestCase):
         self.assertEquals(marker_data_2, 'СНПХ')
 
     def test_take_pads_data_from_row(self):
-
         pad_data = take_pads_data_from_row(self.row_1)
 
         self.assertEquals(pad_data['number'], 541)
         self.assertEquals(pad_data['marker'], 'нет')
 
     def test_take_pads_data_from_table(self):
-
-        pads_data = take_pads_data_from_table(self.table_start_row, self.table_end_row)
+        pads_data = take_pads_data_from_table(self.table_start_row, self.table_end_row,
+                                              path='dvizhenie/tests/test_services/''test_load_data_from_excel/'
+                                                   'Движение_БУ.xlsx')
 
         self.assertEquals(len(pads_data), 2)
         self.assertEquals(pads_data[0]['field'], 'ПРОп')

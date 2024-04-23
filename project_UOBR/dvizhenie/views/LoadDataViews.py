@@ -22,23 +22,24 @@ def export_data_rig_positions(request):
             form = ExportDataForm(request.POST)
             if form.is_valid():
                 result = put_rigs_position_data(table_start_row=form.cleaned_data['table_start_row'],
-                                                table_end_row=form.cleaned_data['table_end_row'])
+                                                table_end_row=form.cleaned_data['table_end_row'],
+                                                path='dvizhenie/uploads/Движение_БУ.xlsx')
                 if result is None:
                     return redirect('rig_position')
                 else:
-                    return render(request, "dvizhenie/export_data_rig_positions.html",
+                    return render(request, "dvizhenie/LoadDataViews_templates/export_data_rig_positions.html",
                                   dict(error_message=result['error_message'], error_rig_position=str(
                                       result['rig_position']['number']) + str(result['rig_position']['field'])))
             else:
-                return render(request, 'dvizhenie/export_data_rig_positions.html',
+                return render(request, 'dvizhenie/LoadDataViews_templates/export_data_rig_positions.html',
                               {'error_message': 'В форме введены некорректные данные! Введите целые числа больше 1.'})
         else:
             form = ExportDataForm()
-            return render(request, "dvizhenie/export_data_rig_positions.html", {"form": form,
-                                                                                "file_creation_date": file_creation_date})
+            return render(request, "dvizhenie/LoadDataViews_templates/export_data_rig_positions.html",
+                          {"form": form, "file_creation_date": file_creation_date})
 
     except AttributeError:
-        return render(request, "dvizhenie/export_data_rig_positions.html",
+        return render(request, "dvizhenie/LoadDataViews_templates/export_data_rig_positions.html",
                       {"error_message": 'Проверьте корректность заполнения таблицы в файле!!!'})
 
 
@@ -54,27 +55,28 @@ def export_data_pads(request):
             form = ExportDataForm(request.POST)
             if form.is_valid():
                 result = put_pads_data(table_start_row=form.cleaned_data['table_start_row'],
-                                       table_end_row=form.cleaned_data['table_end_row'])
+                                       table_end_row=form.cleaned_data['table_end_row'],
+                                       path='dvizhenie/uploads/Движение_БУ.xlsx')
                 if result is None:
                     return redirect('pad')
                 else:
-                    return render(request, "dvizhenie/export_data_pads.html",
+                    return render(request, "dvizhenie/LoadDataViews_templates/export_data_pads.html",
                                   dict(error_message=result['error_message'], error_pad_data=str(
                                       result['pad_data']['number']) + str(result['pad_data']['field'])))
             else:
-                return render(request, 'dvizhenie/export_data_pads.html',
+                return render(request, 'dvizhenie/LoadDataViews_templates/export_data_pads.html',
                               {'error_message': 'В форме введены некорректные данные! Введите целые числа больше 1.'})
 
         else:
             form = ExportDataForm()
 
-        return render(request, "dvizhenie/export_data_pads.html", {"form": form,
-                                                                   "file_creation_date": file_creation_date})
+        return render(request, "dvizhenie/LoadDataViews_templates/export_data_pads.html",
+                      {"form": form, "file_creation_date": file_creation_date})
     except AttributeError:
-        return render(request, "dvizhenie/export_data_pads.html",
+        return render(request, "dvizhenie/LoadDataViews_templates/export_data_pads.html",
                       {"error_message": 'Проверьте корректность заполнения таблицы в файле!!!'})
     except IntegrityError:
-        return render(request, "dvizhenie/export_data_pads.html",
+        return render(request, "dvizhenie/LoadDataViews_templates/export_data_pads.html",
                       {"error_message": 'Проверьте корректность заполнения таблицы в файле!!!'})
 
 
@@ -90,11 +92,11 @@ def upload_file(request):
                 handle_uploaded_file(request.FILES["file"])
                 return redirect(request.session['return_path'])
             else:
-                return render(request, "dvizhenie/upload_file.html",
+                return render(request, "dvizhenie/LoadDataViews_templates/upload_file.html",
                               {"form": form, "error_message": 'Необходимо загрузить файл в формате ".xlsx"!'})
 
     else:
         form = UploadFileForm()
         request.session['return_path'] = request.META.get('HTTP_REFERER', '/')
 
-    return render(request, "dvizhenie/upload_file.html", {"form": form})
+    return render(request, "dvizhenie/LoadDataViews_templates/upload_file.html", {"form": form})

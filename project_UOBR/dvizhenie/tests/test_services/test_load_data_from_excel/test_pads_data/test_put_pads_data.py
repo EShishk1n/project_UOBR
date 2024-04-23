@@ -45,7 +45,8 @@ class PutPadsDataTestCase(TestCase):
         self.assertEquals(len(Pad.objects.all()), 1)
         self.assertEquals(Pad.objects.get(number='147у').nns_quantity, 0)
 
-        put_pads_data(self.table_start_row, self.table_end_row)
+        put_pads_data(self.table_start_row, self.table_end_row, path='dvizhenie/tests/test_services/'
+                                                                     'test_load_data_from_excel/Движение_БУ.xlsx')
 
         self.assertEquals(len(Pad.objects.all()), 2)
         self.assertEquals(Pad.objects.get(number='147у').nns_quantity, 6)

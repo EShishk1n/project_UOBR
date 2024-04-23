@@ -3,10 +3,11 @@ from dvizhenie.services.load_data_from_excel.rigs_position_data.take_rigs_positi
     take_rigs_position_data_from_table
 
 
-def put_rigs_position_data(table_start_row: int, table_end_row: int):
+def put_rigs_position_data(table_start_row: int, table_end_row: int, path: str):
     """Вставляет данные, полученные из таблицы в модель RigPosition"""
 
-    rigs_position_data = take_rigs_position_data_from_table(table_start_row=table_start_row, table_end_row=table_end_row)
+    rigs_position_data = take_rigs_position_data_from_table(table_start_row=table_start_row,
+                                                            table_end_row=table_end_row, path=path)
 
     for rig_position_data in rigs_position_data:
 

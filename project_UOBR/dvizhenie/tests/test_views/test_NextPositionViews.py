@@ -7,7 +7,7 @@ from django.urls import reverse
 from dvizhenie.models import Pad, type_of_DR, Contractor, DrillingRig, RigPosition, PositionRating, NextPosition
 
 
-class NextPositionTestCase(TestCase):
+class NextPositionViewsTestCase(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username='admin')
@@ -150,7 +150,6 @@ class NextPositionTestCase(TestCase):
                           [self.position_rating_1, self.position_rating_2])
 
     def test_commit_next_position(self):
-        """Проверяет функционал по подтверждению NextPosition"""
 
         url = reverse('commit_next_position', args=(self.next_position_1.id,))
         self.client.force_login(user=self.user)
@@ -174,10 +173,7 @@ class NextPositionTestCase(TestCase):
         self.assertEquals(NextPosition.objects.filter(id=self.next_position_1.id)[0].next_position.status,
                           'reserved')
 
-
-# Вот тут остановилсяЫ
     def test_change_next_position(self):
-        """Проверяет функционал по изменению NextPosition"""
 
         url = reverse('change_next_position', args=(self.position_rating_2.id,))
         self.client.force_login(user=self.user)
@@ -190,14 +186,13 @@ class NextPositionTestCase(TestCase):
         permission = Permission.objects.get(name='Can change next position')
         self.user.user_permissions.add(permission)
 
-        self.assertEquals(NextPosition.objects.filter(id=self.next_position_1.id)[0].status, 'Требуется подтверждение')
+        self.assertEquals(NextPosition.objects.filter(id=self.next_position_1.id)[0].status, 'default')
         self.assertEquals(NextPosition.objects.filter(id=self.next_position_1.id)[0].next_position, self.pad_3)
 
         response_perm = self.client.get(url)
 
         self.assertEquals(response_perm.status_code, 302)
-        self.assertEquals(NextPosition.objects.filter(id=self.next_position_1.id)[0].status,
-                          'Изменено. Требуется подтверждение')
+        self.assertEquals(NextPosition.objects.filter(id=self.next_position_1.id)[0].status, 'changed')
         self.assertEquals(NextPosition.objects.filter(id=self.next_position_1.id)[0].next_position, self.pad_2)
 
     def test_delete_next_position(self):
@@ -214,21 +209,20 @@ class NextPositionTestCase(TestCase):
         permission = Permission.objects.get(name='Can change next position')
         self.user.user_permissions.add(permission)
 
-        self.assertEquals(NextPosition.objects.filter(id=self.next_position_1.id)[0].status, 'Требуется подтверждение')
+        self.assertEquals(NextPosition.objects.filter(id=self.next_position_1.id)[0].status, 'default')
         self.assertEquals(NextPosition.objects.filter(id=self.next_position_1.id)[0].next_position, self.pad_3)
 
         response_perm = self.client.get(url)
 
         self.assertEquals(response_perm.status_code, 302)
-        self.assertEquals(NextPosition.objects.filter(id=self.next_position_1.id)[0].status,
-                          'Удалено пользователем')
+        self.assertEquals(NextPosition.objects.filter(id=self.next_position_1.id)[0].status, 'deleted')
         self.assertEquals(NextPosition.objects.filter(id=self.next_position_1.id)[0].next_position, None)
 
     def test_CommitedNextPositionView(self):
         """Проверяет ListView дл отображения подтвержденных позиций NextPosition"""
 
         url = reverse('commited_next_position')
-        NextPosition.objects.filter(id=self.next_position_1.id).update(status='Подтверждено')
+        NextPosition.objects.filter(id=self.next_position_1.id).update(status='commited')
 
         # Тест без permission
         response_noperm = self.client.get(url)
@@ -238,8 +232,8 @@ class NextPositionTestCase(TestCase):
         self.client.force_login(user=self.user)
         response_perm = self.client.get(url)
         self.assertEquals(response_perm.status_code, 200)
-        self.assertEquals([self.next_position_1], list(response_perm.context_data['object_list']))
-        self.assertEquals('Подтверждено', list(response_perm.context_data['object_list'])[0].status)
+        self.assertEquals(list(response_perm.context_data['object_list']), [self.next_position_1])
+        self.assertEquals( list(response_perm.context_data['object_list'])[0].status, 'commited')
 
     def test_delete_commited_position(self):
         """Проверяет функционал по изменению статуса подтвержденной next_position в NextPosition"""
@@ -247,7 +241,7 @@ class NextPositionTestCase(TestCase):
         url = reverse('delete_commited_position', args=(self.next_position_1.id,))
         self.client.force_login(user=self.user)
 
-        NextPosition.objects.filter(id=self.next_position_1.id).update(status='Подтверждено')
+        NextPosition.objects.filter(id=self.next_position_1.id).update(status='commited')
 
         # Тест без permission
         response_noperm = self.client.get(url)
@@ -256,16 +250,14 @@ class NextPositionTestCase(TestCase):
         # Тест с permission
         permission = Permission.objects.get(name='Can change next position')
         self.user.user_permissions.add(permission)
-        self.assertEquals(NextPosition.objects.filter(id=self.next_position_1.id)[0].status, 'Подтверждено')
+        self.assertEquals(NextPosition.objects.filter(id=self.next_position_1.id)[0].status, 'commited')
         self.assertEquals(NextPosition.objects.filter(id=self.next_position_1.id)[0].next_position, self.pad_3)
 
         response_perm = self.client.get(url)
 
         self.assertEquals(response_perm.status_code, 302)
-        self.assertEquals(NextPosition.objects.filter(id=self.next_position_1.id)[0].status,
-                          'Удалено пользователем')
+        self.assertEquals(NextPosition.objects.filter(id=self.next_position_1.id)[0].status, 'deleted')
         self.assertEquals(NextPosition.objects.filter(id=self.next_position_1.id)[0].next_position, None)
-        self.assertEquals(Pad.objects.filter(id=self.pad_3.id)[0].status, '')
 
     def test_commit_commited_position(self):
         """Проверяет функционал по переносу подтвержденной next_position в RigPosition"""
@@ -280,13 +272,13 @@ class NextPositionTestCase(TestCase):
         # Тест с permission
         permission = Permission.objects.get(name='Can change next position')
         self.user.user_permissions.add(permission)
-        self.assertEquals(NextPosition.objects.all().count(), 3)
+        self.assertEquals(NextPosition.objects.all().count(), 2)
         self.assertEquals(RigPosition.objects.all().count(), 3)
-        self.assertEquals(NextPosition.objects.filter(id=self.next_position_1.id)[0].next_position, self.pad_3)
+        self.assertEquals(NextPosition.objects.get(id=self.next_position_1.id).next_position, self.pad_3)
 
         response_perm = self.client.get(url)
 
         self.assertEquals(response_perm.status_code, 302)
-        self.assertEquals(NextPosition.objects.all().count(), 2)
+        self.assertEquals(NextPosition.objects.all().count(), 1)
         self.assertEquals(RigPosition.objects.all().count(), 4)
         self.assertEquals(RigPosition.objects.filter(drilling_rig=self.drilling_rig_1)[1].pad, self.pad_3)

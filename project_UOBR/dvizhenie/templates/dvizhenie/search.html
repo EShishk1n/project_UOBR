@@ -24,17 +24,19 @@
                 </tr>
                 </thead>
                 <tbody class="table-group-divider">
-                {% for pad in result['result_pads'] %}
+
+                {% for pad in result.result_pads %}
+
                 <tr>
-                    <th scope="row">{{pad.0.0.number}}</th>
-                    <td>{{pad.0.0.field}}</td>
-                    <td>{{pad.0.0.first_stage_date|date:"d.m.Y"}}</td>
-                    <td>{{pad.0.0.second_stage_date|date:"d.m.Y"}}</td>
-                    <td>{{pad.0.0.required_capacity}}</td>
-                    <td>{{pad.0.0.required_mud}}</td>
-                    <td>{{pad.0.0.gs_quantity}}</td>
-                    <td>{{pad.0.0.nns_quantity}}</td>
-                    <td>{{pad.0.0.marker}}</td>
+                    <th scope="row">{{pad.0.number}}</th>
+                    <td>{{pad.0.field}}</td>
+                    <td>{{pad.0.first_stage_date|date:"d.m.Y"}}</td>
+                    <td>{{pad.0.second_stage_date|date:"d.m.Y"}}</td>
+                    <td>{{pad.0.required_capacity}}</td>
+                    <td>{{pad.0.required_mud}}</td>
+                    <td>{{pad.0.gs_quantity}}</td>
+                    <td>{{pad.0.nns_quantity}}</td>
+                    <td>{{pad.0.marker}}</td>
                 </tr>
                 {% endfor %}
                 </tbody>
@@ -55,12 +57,12 @@
                 </tr>
                 </thead>
                 <tbody class="table-group-divider">
-                {% for rig in result['result_rigs'] %}
+                {% for rig in result.result_rigs %}
                 <tr>
-                    <th scope="row">{{rig.0.0.number}}</th>
-                    <td>{{rig.0.0.type}}</td>
-                    <td>{{rig.0.0.contractor}}</td>
-                    <td>{{rig.0.0.mud}}</td>
+                    <th scope="row">{{rig.0.number}}</th>
+                    <td>{{rig.0.type}}</td>
+                    <td>{{rig.0.contractor}}</td>
+                    <td>{{rig.0.mud}}</td>
                 </tr>
                 {% endfor %}
                 </tbody>
@@ -85,15 +87,16 @@
                 </tr>
                 </thead>
                 <tbody class="table-group-divider">
-                {% for rig_position in result['rig_position'] %}
+
+                {% for rig_position in result.result_rigs_position %}
                 <tr>
-                    <td>{{rig_position.0.0.drilling_rig.type}}</td>
-                    <td>{{rig_position.0.0.drilling_rig.number}}</td>
-                    <td>{{rig_position.0.0.drilling_rig.contractor}}</td>
-                    <td>{{rig_position.0.0.pad.number}}</td>
-                    <td>{{rig_position.0.0.pad.field}}</td>
-                    <th scope="col">{{rig_position.0.0.start_date|date:"d.m.Y"}}</th>
-                    <th scope="col">{{rig_position.0.0.end_date|date:"d.m.Y"}}</th>
+                    <td>{{rig_position.0.drilling_rig.type}}</td>
+                    <td>{{rig_position.0.drilling_rig.number}}</td>
+                    <td>{{rig_position.0.drilling_rig.contractor}}</td>
+                    <td>{{rig_position.0.pad.number}}</td>
+                    <td>{{rig_position.0.pad.field}}</td>
+                    <th scope="col">{{rig_position.0.start_date|date:"d.m.Y"}}</th>
+                    <th scope="col">{{rig_position.0.end_date|date:"d.m.Y"}}</th>
                 </tr>
                 {% endfor %}
                 </tbody>

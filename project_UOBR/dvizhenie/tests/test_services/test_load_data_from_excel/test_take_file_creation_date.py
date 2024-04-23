@@ -7,7 +7,7 @@ from dvizhenie.services.load_data_from_excel.take_file_creation_date import take
 class TakeFileCreationDataTestCase(TestCase):
 
     def setUp(self):
-        self.file_creation_date = '03-03-2024, 14:24'
+        self.file_creation_date = '23-04-2024, 06:16'
 
     def test_take_file_cration_data(self):
 

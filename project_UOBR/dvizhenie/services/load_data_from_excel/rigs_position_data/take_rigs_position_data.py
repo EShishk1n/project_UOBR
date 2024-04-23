@@ -1,10 +1,11 @@
 from dvizhenie.services.load_data_from_excel.open_work_sheet import open_work_sheet
 
 
-def take_rigs_position_data_from_table(table_start_row: int, table_end_row: int) -> list:
+def take_rigs_position_data_from_table(table_start_row: int, table_end_row: int,
+                                       path: str) -> list:
     """Имортирует данные по окончанию бурения для каждой БУ из файла 'Движение_БУ'"""
 
-    sheet = open_work_sheet('dvizhenie/uploads/Движение_БУ.xlsx')
+    sheet = open_work_sheet(path)
 
     min_row = table_start_row
     max_row = table_end_row

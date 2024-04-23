@@ -30,7 +30,9 @@ class PutRigsPositionDataTestCase(TestCase):
         self.assertEquals(RigPosition.objects.get(drilling_rig=DrillingRig.objects.get(number=666)).end_date,
                           datetime.date(2024, 3, 1))
 
-        put_rigs_position_data(self.table_start_row, self.table_end_row)
+        put_rigs_position_data(self.table_start_row, self.table_end_row, path='dvizhenie/tests/test_services/'
+                                                                              'test_load_data_from_excel/'
+                                                                              'Движение_БУ.xlsx')
 
         self.assertEquals(RigPosition.objects.get(drilling_rig=DrillingRig.objects.get(number=666)).end_date,
                           datetime.date(2023, 8, 21))
