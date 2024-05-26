@@ -80,9 +80,9 @@ WSGI_APPLICATION = 'project_UOBR.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'dvizhenie_BU',
-        'USER': 'dvizhenie_user',
-        'PASSWORD': '122333',
+        'NAME': 'dvizhenie_bu',
+        'USER': 'egorshishkin',
+        'PASSWORD': '74566',
         'HOST': '127.0.0.1',
     }
 }

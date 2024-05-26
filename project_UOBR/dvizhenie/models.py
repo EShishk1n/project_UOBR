@@ -165,6 +165,7 @@ class NextPosition(BaseModel):
 
     current_position = models.OneToOneField(RigPosition, on_delete=models.CASCADE)
     next_position = models.OneToOneField(Pad, null=True, blank=True, on_delete=models.CASCADE)
+    downtime_days = models.IntegerField(default=0)
     status = models.CharField(choices=Status.choices, default=Status.default)
 
     def __str__(self):
@@ -178,6 +179,7 @@ class PositionRating(BaseModel):
     next_position = models.ForeignKey(Pad, on_delete=models.CASCADE)
     capacity_rating = models.FloatField()
     first_stage_date_rating = models.FloatField()
+    downtime_days = models.IntegerField()
     second_stage_date_rating = models.FloatField()
     mud_rating = models.FloatField()
     logistic_rating = models.FloatField()

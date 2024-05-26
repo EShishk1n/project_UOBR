@@ -94,6 +94,7 @@ class DefinePositionTestCase(TestCase):
                                                                  next_position=self.pad_10,
                                                                  capacity_rating=6,
                                                                  first_stage_date_rating=5,
+                                                                 downtime_days=3,
                                                                  second_stage_date_rating=5,
                                                                  mud_rating=6,
                                                                  logistic_rating=4,
@@ -104,6 +105,7 @@ class DefinePositionTestCase(TestCase):
                                                                  next_position=self.pad_5,
                                                                  capacity_rating=6,
                                                                  first_stage_date_rating=5,
+                                                                 downtime_days=9,
                                                                  second_stage_date_rating=5,
                                                                  mud_rating=6,
                                                                  logistic_rating=4,
@@ -114,7 +116,7 @@ class DefinePositionTestCase(TestCase):
     def test_put_result_of_definition_in_NextPosition(self):
         self.assertEquals(self.next_position_3.next_position, None)
 
-        put_result_of_definition_in_NextPosition(self.rig_position_3, self.pad_7, 'default')
+        put_result_of_definition_in_NextPosition(self.rig_position_3, self.pad_7, 'default', 0)
 
         self.assertEquals(NextPosition.objects.get(current_position=self.rig_position_3).next_position, self.pad_7)
         self.assertEquals(NextPosition.objects.get(current_position=self.rig_position_3).status, 'default')
@@ -127,8 +129,8 @@ class DefinePositionTestCase(TestCase):
     def test_get_objs_from_PositionRating(self):
         objs_from_PositionRating = get_objs_from_PositionRating(self.rig_position_3)
 
-        self.assertEquals(objs_from_PositionRating[0], self.position_rating_3_2)
-        self.assertEquals(objs_from_PositionRating[1], self.position_rating_3_1)
+        self.assertEquals(objs_from_PositionRating[0], self.position_rating_3_1)
+        self.assertEquals(objs_from_PositionRating[1], self.position_rating_3_2)
 
     def test_define_next_position(self):
 

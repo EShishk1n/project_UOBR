@@ -61,6 +61,7 @@
                         <th scope="col">БР</th>
                         <th scope="col">ГП</th>
                         <th scope="col">ГС+ННС</th>
+                        <th scope="col">Простой</th>
                         <th scope="col">Маркер</th>
                         <th scope="col">Статус</th>
                         <th scope="col">Действия</th>
@@ -102,6 +103,8 @@
                         </td>
                         <td style="background-color: #f0fff0">{{next_position_.next_position.gs_quantity}} +
                             {{next_position_.next_position.nns_quantity}}
+                        </td>
+                        <td style="background-color: #f0fff0">{{next_position_.downtime_days}}
                         </td>
                         <td style="background-color: #f0fff0">{{next_position_.next_position.marker}}</td>
                         <td>{{next_position_.status}}</td>

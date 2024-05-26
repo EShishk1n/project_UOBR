@@ -37,6 +37,7 @@ class ChangeNextPositionTestCase(TestCase):
                                                              next_position=self.pad_3,
                                                              capacity_rating=6,
                                                              first_stage_date_rating=5,
+                                                             downtime_days=0,
                                                              second_stage_date_rating=5,
                                                              mud_rating=6,
                                                              logistic_rating=4,

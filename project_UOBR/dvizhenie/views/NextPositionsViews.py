@@ -21,9 +21,11 @@ class NextPositionView(LoginRequiredMixin, PermissionRequiredMixin, ListView, Fo
 
     template_name = 'dvizhenie/NextPositionsViews_templates/next_position.html'
     context_object_name = 'next_positions'
-    queryset = NextPosition.objects.exclude(status='commited').select_related('next_position').select_related(
-        'current_position').select_related('current_position__pad').select_related(
-        'current_position__drilling_rig__type').select_related('current_position__drilling_rig__contractor')
+    queryset = NextPosition.objects.exclude(status='commited').select_related(
+                                       'next_position').select_related('current_position').select_related(
+                                       'current_position__pad').select_related(
+                                       'current_position__drilling_rig__type').select_related(
+                                       'current_position__drilling_rig__contractor')
     ordering = "current_position__end_date"
     permission_required = 'dvizhenie.view_nextposition'
     form_class = DefinePositionForm
@@ -81,7 +83,8 @@ def get_rating_for_all_possible_next_positions(request, pk):
     if request.method == 'GET':
         next_position_object = NextPosition.objects.get(id=pk)
         position_rating = PositionRating.objects.filter(
-            current_position=next_position_object.current_position.id).order_by('-common_rating').select_related(
+            current_position=next_position_object.current_position.id).order_by(
+            'downtime_days', '-common_rating').select_related(
             'current_position').select_related(
             'current_position__pad').select_related('current_position__drilling_rig').select_related(
             'current_position__drilling_rig__contractor').select_related(

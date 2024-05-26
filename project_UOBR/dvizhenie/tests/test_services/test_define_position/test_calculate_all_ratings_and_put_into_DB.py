@@ -79,14 +79,14 @@ class CalculateAllRatingsAndPutIntoDBTestCase(TestCase):
         free_pads = Pad.objects.all()
         rigs = RigPosition.objects.all()
         calculate_ratings_for_positions_and_put_into_DB(rigs, free_pads)
-        self.assertEquals(len(PositionRating.objects.all()), 10)
+        self.assertEquals(len(PositionRating.objects.all()), 11)
 
     def test_clear_PositionRating(self):
         free_pads = Pad.objects.all()
         rigs = RigPosition.objects.all()
         calculate_ratings_for_positions_and_put_into_DB(rigs, free_pads)
 
-        self.assertEquals(len(PositionRating.objects.all()), 10)
+        self.assertEquals(len(PositionRating.objects.all()), 11)
         clear_PositionRating()
         self.assertEquals(len(PositionRating.objects.all()), 0)
 
@@ -103,4 +103,4 @@ class CalculateAllRatingsAndPutIntoDBTestCase(TestCase):
         end_date_for_calculation = date(2024, 3, 2)
         calculate_all_ratings_and_put_into_DB(start_date_for_calculation, end_date_for_calculation)
 
-        self.assertEquals(len(PositionRating.objects.all()), 8)
+        self.assertEquals(len(PositionRating.objects.all()), 9)

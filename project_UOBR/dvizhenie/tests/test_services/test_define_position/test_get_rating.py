@@ -82,11 +82,14 @@ class GetRatingTestCase(TestCase):
         self.assertEquals(result, [10, 3, 0])
 
     def test__get_first_stage_date_rating(self):
-        result = []
+        result_rating = []
+        result_downtime = []
         for pad in (self.pad_2, self.pad_9, self.pad_10):
-            result.append(get_first_stage_date_rating(self.rig_position_1, pad))
+            result_rating.append(get_first_stage_date_rating(self.rig_position_1, pad)[0])
+            result_downtime.append(get_first_stage_date_rating(self.rig_position_1, pad)[1])
 
-        self.assertEquals(result, [10, 0.5, 6])
+        self.assertEquals(result_rating, [10, 1, 1])
+        self.assertEquals(result_downtime, [0, 12, 2])
 
     def test__get_second_stage_date_rating(self):
         result = []

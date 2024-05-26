@@ -27,6 +27,7 @@
                     <th scope="col">БР</th>
                     <th scope="col">ГП</th>
                     <th scope="col">ГС+ННС</th>
+                    <th scope="col">Простой</th>
                     <th scope="col">Маркер</th>
                     <th scope="col">Рейтинг</th>
                     <th scope="col">Действия</th>
@@ -60,6 +61,8 @@
                     <td style="background-color: #f0fff0">{{position_rating_.next_position.required_capacity}}</td>
                     <td style="background-color: #f0fff0">{{position_rating_.next_position.gs_quantity}} +
                         {{position_rating_.next_position.nns_quantity}}
+                    </td>
+                    <td style="background-color: #f0fff0">{{position_rating_.downtime_days}}
                     </td>
                     <td style="background-color: #f0fff0">{{position_rating_.next_position.marker}}</td>
                     <td>{{position_rating_.common_rating}}</td>

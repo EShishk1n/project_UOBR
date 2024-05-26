@@ -1,3 +1,6 @@
+import datetime
+from typing import Tuple
+
 from dvizhenie.models import RigPosition, Pad, PositionRating
 
 from datetime import timedelta
@@ -18,14 +21,14 @@ def get_rating(rig_for_define_next_position: RigPosition, free_pad: Pad) -> Posi
     rating = PositionRating(current_position=rig_for_define_next_position,
                             next_position=free_pad,
                             capacity_rating=get_capacity_rating(rig_for_define_next_position, free_pad),
-                            first_stage_date_rating=get_first_stage_date_rating(rig_for_define_next_position, free_pad),
+                            first_stage_date_rating=get_first_stage_date_rating(rig_for_define_next_position,
+                                                                                free_pad)[0],
+                            downtime_days=get_first_stage_date_rating(rig_for_define_next_position, free_pad)[1],
                             second_stage_date_rating=get_second_stage_date_rating(rig_for_define_next_position,
                                                                                   free_pad),
                             mud_rating=get_mud_rating(rig_for_define_next_position, free_pad),
                             logistic_rating=get_logistic_rating(rig_for_define_next_position, free_pad),
                             marker_rating=get_marker_rating(rig_for_define_next_position, free_pad))
-
-    # print(rating.capacity_rating, rating.first_stage_date_rating, rating.second_stage_date_rating, rating.marker_rating)
 
     if (rating.capacity_rating * rating.first_stage_date_rating * rating.second_stage_date_rating *
             rating.mud_rating * rating.logistic_rating * rating.marker_rating != 0):
@@ -68,11 +71,12 @@ def get_capacity_rating(rig_for_define_next_position: RigPosition, free_pad: Pad
     return capacity_rating
 
 
-def get_first_stage_date_rating(rig_for_define_next_position: RigPosition, free_pad: Pad) -> float:
+def get_first_stage_date_rating(rig_for_define_next_position: RigPosition, free_pad: Pad) -> tuple[int, int]:
     """Получает рейтинг по дате готовности первого этапа для пары кустов"""
 
     end_date = rig_for_define_next_position.end_date
     first_stage_date = free_pad.first_stage_date
+    downtime = 0
 
     if end_date >= first_stage_date:
         first_stage_date_rating = 10
@@ -81,22 +85,20 @@ def get_first_stage_date_rating(rig_for_define_next_position: RigPosition, free_
     elif end_date + timedelta(7) >= first_stage_date:
         first_stage_date_rating = 9
 
-        # Первый этап будет готов через 12 дней после выхода БУ (6 баллов)
-    elif end_date + timedelta(12) >= first_stage_date:
+        # Первый этап будет готов через 10 дней после выхода БУ (6 баллов)
+    elif end_date + timedelta(10) >= first_stage_date:
         first_stage_date_rating = 6
 
-    # Первый этап будет готов через 18 дней после выхода БУ (1 баллов)
-    elif end_date + timedelta(18) >= first_stage_date:
-        first_stage_date_rating = 1
-
-    # Первый этап будет готов через 25 дней после выхода БУ (0.5 баллов)
-    elif end_date + timedelta(25) >= first_stage_date:
-        first_stage_date_rating = 0.5
-
     else:
-        first_stage_date_rating = 0
+        first_stage_date_rating = 1
+        downtime = get_downtime(end_date, first_stage_date)
 
-    return first_stage_date_rating
+    return first_stage_date_rating, downtime
+
+
+def get_downtime(end_date: datetime.date, first_stage_date: datetime.date) -> int:
+    downtime = first_stage_date - end_date - timedelta(10)
+    return downtime.days
 
 
 def get_second_stage_date_rating(rig_for_define_next_position: RigPosition, free_pad: Pad) -> float:
@@ -120,6 +122,9 @@ def get_second_stage_date_rating(rig_for_define_next_position: RigPosition, free
     # Второй этап будет готов через 42 дня после выхода БУ (1 балл, требуется ускорение)
     elif end_date + timedelta(42) >= second_stage_date:
         second_stage_date_rating = 0.5
+
+    elif end_date + timedelta(150) >= second_stage_date:
+        second_stage_date_rating = 0.1
 
     else:
         second_stage_date_rating = 0

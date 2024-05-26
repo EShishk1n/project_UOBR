@@ -23,7 +23,8 @@ def define_position_and_put_into_DB(start_date_for_calculation: datetime.date,
         current_position = obj.current_position
         result: [dict] = define_next_position(current_position)
 
-        put_result_of_definition_in_NextPosition(current_position, result['next_position'], result['status'])
+        put_result_of_definition_in_NextPosition(current_position, result['next_position'], result['status'],
+                                                 result['downtime_days'])
 
 
 def define_next_position(rig_for_define_next_position: RigPosition) -> dict:
@@ -34,18 +35,21 @@ def define_next_position(rig_for_define_next_position: RigPosition) -> dict:
     if not positions:
         next_position = None
         status = 'empty'
+        downtime_days = 100000
 
     else:
         next_position = positions.first().next_position
         status = 'default'
+        downtime_days = positions.first().downtime_days
         give_status_booked_to_PositionRating(next_position)
 
         if check_availability_of_obj_in_NextPosition(next_position, 'next_position') is True:
             res = define_next_position(rig_for_define_next_position)
             next_position = res['next_position']
             status = res['status']
+            downtime_days = res['downtime_days']
 
-    res = {'next_position': next_position, 'status': status}
+    res = {'next_position': next_position, 'status': status, 'downtime_days': downtime_days}
 
     return res
 
@@ -53,7 +57,7 @@ def define_next_position(rig_for_define_next_position: RigPosition) -> dict:
 def get_objs_from_PositionRating(current_position: RigPosition) -> QuerySet(PositionRating):
 
     objs_from_PositionRating = PositionRating.objects.filter(current_position=current_position, status='').order_by(
-        '-common_rating')
+        'downtime_days', '-common_rating')
 
     return objs_from_PositionRating
 
@@ -63,6 +67,8 @@ def give_status_booked_to_PositionRating(booked_next_position: Pad) -> None:
     PositionRating.objects.filter(next_position=booked_next_position).update(status='booked')
 
 
-def put_result_of_definition_in_NextPosition(current_position: RigPosition, next_position: Pad, status: str) -> None:
+def put_result_of_definition_in_NextPosition(current_position: RigPosition, next_position: Pad, status: str,
+                                             downtime_days: int) -> None:
 
-    NextPosition.objects.filter(current_position=current_position).update(status=status, next_position=next_position)
+    NextPosition.objects.filter(current_position=current_position).update(status=status, next_position=next_position,
+                                                                          downtime_days=downtime_days)
