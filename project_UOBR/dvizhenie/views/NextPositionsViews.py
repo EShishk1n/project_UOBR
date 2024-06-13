@@ -6,13 +6,14 @@ from django.views.generic import ListView
 from django.views.generic.edit import FormMixin
 
 from dvizhenie.forms import DefinePositionForm
-from dvizhenie.models import NextPosition, PositionRating, RigPosition
+from dvizhenie.models import NextPosition, PositionRating, RigPosition, Pad
 from dvizhenie.services.define_position.define_position import define_position_and_put_into_DB
 from dvizhenie.services.funcs_for_views.change_next_position import _change_next_position
 
 from dvizhenie.services.funcs_for_views.define_next_position_after_changes import define_next_position_after_changes
 from dvizhenie.services.funcs_for_views.update_NextPosition import update_NextPosition
-from dvizhenie.services.give_statuses_to_pads.give_status_free_to_pads import give_status_free_to_pads
+from dvizhenie.services.give_statuses_to_pads.give_status_free_to_pads import give_status_free_to_pads, \
+    update_status_free_to_pads
 from dvizhenie.services.give_statuses_to_pads.give_status_reserved_to_pads import give_status_reserved_to_pads
 
 
@@ -115,7 +116,7 @@ def change_next_position(request, pk):
 
     if request.method == 'GET':
         _change_next_position(different_next_position=PositionRating.objects.get(id=pk))
-
+        update_status_free_to_pads()
         define_next_position_after_changes()
 
     return redirect('next_position')
@@ -145,7 +146,7 @@ def reset_all_changes(request):
     if request.method == 'GET':
         update_NextPosition(next_position_queryset=NextPosition.objects.exclude(status='commited'), status='default',
                             reset_next_position=True)
-
+        update_status_free_to_pads()
         define_next_position_after_changes()
 
     return redirect('next_position')
@@ -169,10 +170,11 @@ def delete_commited_position(request, pk):
     """Меняет статус подтвержденной пары на 'Требуется подтверждение'"""
 
     if request.method == 'GET':
+        Pad.objects.filter(id=NextPosition.objects.filter(id=pk).values_list(
+            'next_position').first()[0]).update(status='free')
+
         update_NextPosition(next_position_queryset=NextPosition.objects.filter(id=pk), status='deleted',
                             reset_next_position=True)
-
-        give_status_free_to_pads()
 
     return redirect('commited_next_position')
 
